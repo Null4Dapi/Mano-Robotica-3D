@@ -1,0 +1,32 @@
+# Compilados y binarios C++
+*.exe
+*.o
+*.obj
+*.out
+*.app
+bin/
+build/
+dist/
+
+# Archivos de depuración y dumps
+*.dSYM/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*~
+.codegraph/
+.atl/
+.pi/
+
+# Temporales y logs
+*.log
+*.tmp
+
+# Dependencias npm locales si las hubiera
+node_modules/

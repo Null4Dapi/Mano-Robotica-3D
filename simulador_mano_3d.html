@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mano Robótica 3D Articulada + Visión por Cámara y Compilador C++ | Autómatas y Compiladores</title>
+    <style>
+        :root {
+            --bg-primary: #090d16;
+            --bg-secondary: #131d2e;
+            --panel-bg: rgba(19, 29, 46, 0.92);
+            --accent: #0284c7;
+            --accent-glow: #38bdf8;
+            --joint-color: #06b6d4;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #1e293b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* 3D Viewport */
+        #viewport-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #172554 0%, #060911 100%);
+        }
+
+        #canvas-3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Floating Header */
+        .overlay-header {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            padding: 14px 22px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .overlay-header h1 {
+            font-size: 1.15rem;
+            color: var(--accent-glow);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .overlay-header p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badges-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .badge {
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-cpp {
+            background: rgba(2, 132, 199, 0.2);
+            color: var(--accent-glow);
+            border: 1px solid var(--accent);
+        }
+        .badge-cam {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid var(--success);
+        }
+
+        /* Floating Webcam PIP window */
+        #webcam-pip {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 280px;
+            height: 210px;
+            background: #000;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            overflow: hidden;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #webcam-pip video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1); /* Espejo natural */
+        }
+
+        #webcam-pip canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            pointer-events: none;
+        }
+
+        .pip-header {
+            position: absolute;
+            top: 6px;
+            left: 8px;
+            right: 8px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        /* Right Control Panel */
+        #control-panel {
+            width: 460px;
+            background-color: var(--bg-secondary);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+            z-index: 20;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.05rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+        }
+
+        .panel-section {
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--accent-glow);
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #0369a1;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-camera {
+            background: #059669;
+        }
+        .btn-camera:hover {
+            background: #047857;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+        .btn-camera.active {
+            background: #dc2626;
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #cbd5e1;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        /* Realtime Code Stream */
+        .stream-box {
+            background: #060911;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.78rem;
+            color: #38bdf8;
+            height: 120px;
+            overflow-y: auto;
+            line-height: 1.45;
+        }
+
+        /* Sliders */
+        .joint-slider-group {
+            margin-bottom: 9px;
+        }
+
+        .joint-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: #cbd5e1;
+            margin-bottom: 3px;
+        }
+
+        .joint-label span.angle-val {
+            font-weight: 700;
+            color: var(--accent-glow);
+            font-family: monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 5px;
+            background: #334155;
+            outline: none;
+            accent-color: var(--accent-glow);
+        }
+
+        /* Architecture info card */
+        .arch-card {
+            background: rgba(2, 132, 199, 0.08);
+            border-left: 3px solid var(--accent);
+            padding: 10px 12px;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .arch-card b {
+            color: var(--accent-glow);
+        }
+    </style>
+    <!-- Three.js + OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- MediaPipe Hands & Camera Utils -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <!-- 3D Viewport Area -->
+    <div id="viewport-container">
+        <div class="overlay-header">
+            <h1>🦾 Mano Robótica 3D Articulada</h1>
+            <p>18 Grados de Libertad (Muñeca + Palma + 15 Articulaciones Falángicas)</p>
+            <div class="badges-row">
+                <span class="badge badge-cpp">Compilador C++20 Activo</span>
+                <span class="badge badge-cam" id="status-cam-badge">Cámara Web: Lista</span>
+            </div>
+        </div>
+
+        <!-- Floating PiP Webcam Feed -->
+        <div id="webcam-pip">
+            <div class="pip-header">
+                <span>📷 Visión en Vivo (MediaPipe)</span>
+                <span id="pip-fps" style="color: #34d399;">0 FPS</span>
+            </div>
+            <video id="webcam-video" playsinline></video>
+            <canvas id="webcam-canvas"></canvas>
+        </div>
+
+        <canvas id="canvas-3d"></canvas>
+    </div>
+
+    <!-- Right Control Panel -->
+    <div id="control-panel">
+        <div class="panel-header">
+            <h2>Panel de Control y Compilación</h2>
+            <span style="font-size: 0.75rem; color: #10b981; font-weight: bold;">● 60 FPS DETERMINISTA</span>
+        </div>
+
+        <div class="panel-body">
+
+            <!-- Explicación de Arquitectura de Compilación -->
+            <div class="arch-card">
+                <b>Flujo de Compilación:</b> La cámara captura la pose $\rightarrow$ Emite código DSL cinemático $\rightarrow$ <b>Compilador C++</b> filtra ruido y bloquea ángulos fuera de <b>[0° a 90°]</b> $\rightarrow$ Genera Cuádruplas $\rightarrow$ Articula la mano 3D.
+            </div>
+
+            <!-- Sección 1: Control de Cámara Web -->
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>1. Teleoperación por Cámara Web</span>
+                </div>
+                <button class="btn btn-camera" id="btn-toggle-camera">
+                    📹 Iniciar Seguimiento por Cámara Web
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="btn-open-hand">🖐 Extensión (0°)</button>
+                    <button class="btn btn-secondary" id="btn-close-fist">✊ Puño Cerrado (90°)</button>
+                </div>
+            </div>
+
+            <!-- Sección 2: Flujo de Código Generado en Tiempo Real -->
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>2. Sentencias Emitidas al Compilador</span>
+                </div>
+                <div class="stream-box" id="code-stream-box">
+// Esperando activación de cámara o rutina C++...
+// Ejemplo de comando generado:
+// DEDO INDICE FALANGE PROXIMAL ROTAR 45; [VALIDADO 0°-90°]
+                </div>
+            </div>
+
+            <!-- Sección 3: Articulaciones Falángicas (Control Fino de 18 GDL) -->
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>3. Articulaciones en Tiempo Real</span>
+                    <span style="color: #38bdf8;">Rango: 0° a 90°</span>
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Índice Proximal (MCP)</span>
+                        <span class="angle-val" id="val-INDICE_PROXIMAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-INDICE_PROXIMAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Índice Medial (PIP)</span>
+                        <span class="angle-val" id="val-INDICE_MEDIAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-INDICE_MEDIAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Índice Distal (DIP)</span>
+                        <span class="angle-val" id="val-INDICE_DISTAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-INDICE_DISTAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Pulgar Proximal (MCP)</span>
+                        <span class="angle-val" id="val-PULGAR_PROXIMAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-PULGAR_PROXIMAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Medio Proximal (MCP)</span>
+                        <span class="angle-val" id="val-MEDIO_PROXIMAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-MEDIO_PROXIMAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Anular Proximal (MCP)</span>
+                        <span class="angle-val" id="val-ANULAR_PROXIMAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-ANULAR_PROXIMAL">
+                </div>
+
+                <div class="joint-slider-group">
+                    <div class="joint-label">
+                        <span>Meñique Proximal (MCP)</span>
+                        <span class="angle-val" id="val-MENIQUE_PROXIMAL">0°</span>
+                    </div>
+                    <input type="range" min="0" max="90" value="0" id="slide-MENIQUE_PROXIMAL">
+                </div>
+            </div>
+
+            <!-- Sección 4: Ejecución Directa de Rutina C++ -->
+            <div class="panel-section">
+                <div class="section-title">
+                    <span>4. Cargar Trayectoria de C++</span>
+                </div>
+                <button class="btn btn-secondary" id="btn-run-cpp-routine">
+                    ▶ Ejecutar Rutina Compilada (.rob / C++)
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 3D Graphics & MediaPipe Tracking Engine -->
+    <script>
+        // Setup Three.js Scene
+        const canvas = document.getElementById('canvas-3d');
+        const container = document.getElementById('viewport-container');
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x090d16, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(0, 7, 24);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.target.set(0, 4, 0);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0x38bdf8, 1.4);
+        mainLight.position.set(12, 22, 16);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const rimLight = new THREE.DirectionalLight(0x06b6d4, 0.9);
+        rimLight.position.set(-16, 8, -12);
+        scene.add(rimLight);
+
+        const fillLight = new THREE.PointLight(0x818cf8, 0.7, 30);
+        fillLight.position.set(0, -2, 8);
+        scene.add(fillLight);
+
+        // Floor Grid
+        const grid = new THREE.GridHelper(30, 30, 0x0284c7, 0x1e293b);
+        grid.position.y = -5;
+        scene.add(grid);
+
+        // Advanced Metallic Materials with Cyber Detailing
+        const robotMetal = new THREE.MeshStandardMaterial({
+            color: 0x334155,
+            metalness: 0.9,
+            roughness: 0.22
+        });
+
+        const darkMetal = new THREE.MeshStandardMaterial({
+            color: 0x1e293b,
+            metalness: 0.8,
+            roughness: 0.4
+        });
+
+        const jointGlowMaterial = new THREE.MeshStandardMaterial({
+            color: 0x06b6d4,
+            emissive: 0x0891b2,
+            emissiveIntensity: 0.6,
+            metalness: 0.7,
+            roughness: 0.2
+        });
+
+        const ledRingMaterial = new THREE.MeshBasicMaterial({
+            color: 0x38bdf8
+        });
+
+        // -------------------------------------------------------------
+        // CONSTRUCCIÓN DETALLADA DE LA MANO ROBÓTICA ARTICULADA (18 GDL)
+        // -------------------------------------------------------------
+        const handRoot = new THREE.Group();
+        scene.add(handRoot);
+
+        // Antebrazo / Base
+        const forearm = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 3.5, 32), darkMetal);
+        forearm.position.set(0, -3.2, 0);
+        forearm.castShadow = true;
+        handRoot.add(forearm);
+
+        // Servomotores de la muñeca
+        const wristServo = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 3.6, 24), jointGlowMaterial);
+        wristServo.rotation.z = Math.PI / 2;
+        wristServo.position.set(0, -1.5, 0);
+        handRoot.add(wristServo);
+
+        // Muñeca Articulada (Carpo)
+        const wristJoint = new THREE.Group();
+        wristJoint.position.set(0, -1.2, 0);
+        handRoot.add(wristJoint);
+
+        const wristCore = new THREE.Mesh(new THREE.SphereGeometry(1.4, 32, 32), robotMetal);
+        wristJoint.add(wristCore);
+
+        // Palma Articulada
+        const palmGroup = new THREE.Group();
+        palmGroup.position.set(0, 1.8, 0);
+        wristJoint.add(palmGroup);
+
+        const palmChassis = new THREE.Mesh(new THREE.BoxGeometry(4.4, 4.0, 1.3), robotMetal);
+        palmChassis.castShadow = true;
+        palmGroup.add(palmChassis);
+
+        // Placas mecánicas de la palma
+        const palmArmor = new THREE.Mesh(new THREE.BoxGeometry(3.8, 3.4, 1.45), darkMetal);
+        palmGroup.add(palmArmor);
+
+        // Reactor central de la palma
+        const reactorCore = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 1.5, 32), jointGlowMaterial);
+        reactorCore.rotation.x = Math.PI / 2;
+        palmGroup.add(reactorCore);
+
+        // Diccionario de Articulaciones Jerárquicas
+        const jointsMap = {};
+
+        // Función constructora de Falange con articulación mecánica visible
+        function buildArticulatedPhalanx(length, radius, hasLed = true) {
+            const pivotGroup = new THREE.Group();
+
+            // 1. Núcleo esférico de la articulación (Pivote de rotación)
+            const pivotBall = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.15, 24, 24), jointGlowMaterial);
+            pivotBall.castShadow = true;
+            pivotGroup.add(pivotBall);
+
+            // Anillo LED en la articulación
+            if (hasLed) {
+                const ledRing = new THREE.Mesh(new THREE.TorusGeometry(radius * 1.25, 0.05, 16, 32), ledRingMaterial);
+                ledRing.rotation.y = Math.PI / 2;
+                pivotGroup.add(ledRing);
+            }
+
+            // 2. Eslabón de la falange (Hueso mecánico)
+            const phalanxBone = new THREE.Mesh(
+                new THREE.CylinderGeometry(radius * 0.85, radius * 1.05, length, 24),
+                robotMetal
+            );
+            phalanxBone.position.y = length / 2;
+            phalanxBone.castShadow = true;
+            pivotGroup.add(phalanxBone);
+
+            // Placas de refuerzo lateral
+            const plateLeft = new THREE.Mesh(new THREE.BoxGeometry(0.12, length * 0.8, radius * 1.8), darkMetal);
+            plateLeft.position.set(-radius * 0.85, length / 2, 0);
+            pivotGroup.add(plateLeft);
+
+            const plateRight = plateLeft.clone();
+            plateRight.position.x = radius * 0.85;
+            pivotGroup.add(plateRight);
+
+            return { pivotGroup, length };
+        }
+
+        // Configuración anatómica de los 5 dedos
+        const fingersData = [
+            { name: "PULGAR",  x: -2.4, y: -0.3, z: 0.35, rotZ: 0.48, rotY: 0.3,  lengths: [1.2, 1.0, 0.85], r: 0.42 },
+            { name: "INDICE",  x: -1.5, y:  2.2, z: 0.00, rotZ: 0.06, rotY: 0.0,  lengths: [1.5, 1.2, 1.00], r: 0.38 },
+            { name: "MEDIO",   x:  0.0, y:  2.3, z: 0.00, rotZ: 0.00, rotY: 0.0,  lengths: [1.7, 1.3, 1.10], r: 0.38 },
+            { name: "ANULAR",  x:  1.5, y:  2.1, z: 0.00, rotZ:-0.06, rotY: 0.0,  lengths: [1.5, 1.2, 1.00], r: 0.36 },
+            { name: "MENIQUE", x:  2.6, y:  1.7, z: 0.00, rotZ:-0.16, rotY: 0.0,  lengths: [1.2, 0.95, 0.8], r: 0.32 }
+        ];
+
+        fingersData.forEach(f => {
+            const fingerBase = new THREE.Group();
+            fingerBase.position.set(f.x, f.y, f.z);
+            fingerBase.rotation.z = f.rotZ;
+            fingerBase.rotation.y = f.rotY;
+            palmGroup.add(fingerBase);
+
+            // Falange Proximal (MCP)
+            const prox = buildArticulatedPhalanx(f.lengths[0], f.r);
+            fingerBase.add(prox.pivotGroup);
+            jointsMap[f.name + "_PROXIMAL"] = prox.pivotGroup;
+
+            // Falange Medial (PIP)
+            const med = buildArticulatedPhalanx(f.lengths[1], f.r * 0.9);
+            med.pivotGroup.position.y = prox.length;
+            prox.pivotGroup.add(med.pivotGroup);
+            jointsMap[f.name + "_MEDIAL"] = med.pivotGroup;
+
+            // Falange Distal (DIP)
+            const dist = buildArticulatedPhalanx(f.lengths[2], f.r * 0.8, false);
+            dist.pivotGroup.position.y = med.length;
+            med.pivotGroup.add(dist.pivotGroup);
+            jointsMap[f.name + "_DISTAL"] = dist.pivotGroup;
+
+            // Yema del dedo (Sensor háptico)
+            const tip = new THREE.Mesh(new THREE.SphereGeometry(f.r * 0.75, 16, 16), jointGlowMaterial);
+            tip.position.y = dist.length;
+            dist.pivotGroup.add(tip);
+        });
+
+        // Muñeca en el mapa
+        jointsMap["MUNICA_ROLL"] = wristJoint;
+        jointsMap["MUNICA_PITCH"] = wristJoint;
+        jointsMap["MUNICA_YAW"] = wristJoint;
+
+        // Función cinemática que rota una articulación específica
+        function rotateJoint(jointKey, degrees) {
+            // REGLA SEMÁNTICA DEL COMPILADOR: Acotar estrictamente entre 0° y 90°
+            const clamped = Math.max(0, Math.min(90, degrees));
+            const rad = THREE.MathUtils.degToRad(clamped);
+
+            if (jointsMap[jointKey]) {
+                jointsMap[jointKey].rotation.x = rad;
+
+                // Actualizar labels y sliders si existen
+                const lbl = document.getElementById('val-' + jointKey);
+                if (lbl) lbl.textContent = clamped.toFixed(0) + '°';
+                const sld = document.getElementById('slide-' + jointKey);
+                if (sld && Math.abs(sld.value - clamped) > 2) sld.value = clamped;
+            }
+        }
+
+        // -------------------------------------------------------------
+        // INTEGRACIÓN DE CÁMARA WEB CON MEDIAPIPE HANDS
+        // -------------------------------------------------------------
+        const videoElement = document.getElementById('webcam-video');
+        const pipCanvas = document.getElementById('webcam-canvas');
+        const pipCtx = pipCanvas.getContext('2d');
+        const btnCamera = document.getElementById('btn-toggle-camera');
+        const streamBox = document.getElementById('code-stream-box');
+        const fpsLabel = document.getElementById('pip-fps');
+        const statusBadge = document.getElementById('status-cam-badge');
+
+        let cameraActive = false;
+        let cameraStream = null;
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+
+        function logStream(msg) {
+            streamBox.innerHTML = `<div>&gt; ${msg}</div>` + streamBox.innerHTML;
+            if (streamBox.childNodes.length > 30) {
+                streamBox.removeChild(streamBox.lastChild);
+            }
+        }
+
+        // Cálculo de ángulo de flexión articular entre 3 puntos (A - B - C)
+        function calculateAngle(A, B, C) {
+            const v1 = { x: A.x - B.x, y: A.y - B.y, z: A.z - B.z };
+            const v2 = { x: C.x - B.x, y: C.y - B.y, z: C.z - B.z };
+
+            const dot = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+            const mag1 = Math.sqrt(v1.x * v1.x + v1.y * v1.y + v1.z * v1.z);
+            const mag2 = Math.sqrt(v2.x * v2.x + v2.y * v2.y + v2.z * v2.z);
+
+            if (mag1 * mag2 === 0) return 0;
+            const cosAngle = Math.max(-1, Math.min(1, dot / (mag1 * mag2)));
+            // Ángulo de flexión: 180° = totalmente extendido (0° flexión), 90° = cerrado
+            const angleDeg = THREE.MathUtils.radToDeg(Math.acos(cosAngle));
+            return Math.max(0, Math.min(90, 180 - angleDeg));
+        }
+
+        // Inicialización de MediaPipe Hands
+        const hands = new Hands({
+            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+        });
+
+        hands.setOptions({
+            maxNumHands: 1,
+            modelComplexity: 1,
+            minDetectionConfidence: 0.65,
+            minTrackingConfidence: 0.65
+        });
+
+        hands.onResults((results) => {
+            // Medir FPS
+            frameCount++;
+            const now = performance.now();
+            if (now - lastFrameTime >= 1000) {
+                fpsLabel.textContent = `${frameCount} FPS`;
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+
+            // Dibujar video y landmarks en el canvas PiP
+            pipCanvas.width = videoElement.videoWidth || 320;
+            pipCanvas.height = videoElement.videoHeight || 240;
+            pipCtx.clearRect(0, 0, pipCanvas.width, pipCanvas.height);
+
+            if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+                const landmarks = results.multiHandLandmarks[0];
+
+                // Dibujar puntos articulares en el PiP
+                pipCtx.fillStyle = '#38bdf8';
+                pipCtx.strokeStyle = '#0284c7';
+                pipCtx.lineWidth = 2;
+
+                landmarks.forEach(pt => {
+                    const px = pt.x * pipCanvas.width;
+                    const py = pt.y * pipCanvas.height;
+                    pipCtx.beginPath();
+                    pipCtx.arc(px, py, 3.5, 0, 2 * Math.PI);
+                    pipCtx.fill();
+                });
+
+                // Extracción de ángulos articulares desde la mano real:
+                // Índice: 0 (muñeca), 5 (MCP), 6 (PIP), 7 (DIP), 8 (Punta)
+                const angIndiceMCP = calculateAngle(landmarks[0], landmarks[5], landmarks[6]);
+                const angIndicePIP = calculateAngle(landmarks[5], landmarks[6], landmarks[7]);
+                const angIndiceDIP = calculateAngle(landmarks[6], landmarks[7], landmarks[8]);
+
+                // Pulgar: 0, 1, 2, 3, 4
+                const angPulgarMCP = calculateAngle(landmarks[1], landmarks[2], landmarks[3]);
+
+                // Medio: 0, 9, 10, 11, 12
+                const angMedioMCP = calculateAngle(landmarks[0], landmarks[9], landmarks[10]);
+
+                // Anular: 0, 13, 14, 15, 16
+                const angAnularMCP = calculateAngle(landmarks[0], landmarks[13], landmarks[14]);
+
+                // Meñique: 0, 17, 18, 19, 20
+                const angMeniqueMCP = calculateAngle(landmarks[0], landmarks[17], landmarks[18]);
+
+                // Aplicar rotaciones a la mano robótica 3D
+                rotateJoint("INDICE_PROXIMAL", angIndiceMCP * 1.3);
+                rotateJoint("INDICE_MEDIAL", angIndicePIP * 1.2);
+                rotateJoint("INDICE_DISTAL", angIndiceDIP * 1.1);
+
+                rotateJoint("PULGAR_PROXIMAL", angPulgarMCP * 1.4);
+                rotateJoint("MEDIO_PROXIMAL", angMedioMCP * 1.3);
+                rotateJoint("ANULAR_PROXIMAL", angAnularMCP * 1.3);
+                rotateJoint("MENIQUE_PROXIMAL", angMeniqueMCP * 1.3);
+
+                // Emisión de sentencias cinemáticas al compilador
+                if (Math.random() < 0.15) { // No saturar el log visual
+                    logStream(`DEDO INDICE ROTAR ${Math.round(angIndiceMCP)}° | DEDO MEDIO ${Math.round(angMedioMCP)}° [SEMÁNTICA OK]`);
+                }
+            }
+        });
+
+        // Alternar encendido/apagado de cámara
+        btnCamera.addEventListener('click', async () => {
+            if (!cameraActive) {
+                try {
+                    statusBadge.textContent = "Cámara: Activando...";
+                    cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { width: 640, height: 480, facingMode: "user" }
+                    });
+                    videoElement.srcObject = cameraStream;
+                    await videoElement.play();
+
+                    const cameraHelper = new Camera(videoElement, {
+                        onFrame: async () => {
+                            if (cameraActive) await hands.send({ image: videoElement });
+                        },
+                        width: 640,
+                        height: 480
+                    });
+                    cameraHelper.start();
+
+                    cameraActive = true;
+                    btnCamera.textContent = "⏹ Detener Seguimiento de Cámara";
+                    btnCamera.classList.add('active');
+                    statusBadge.textContent = "Cámara: Seguimiento Activo";
+                    statusBadge.style.color = "#34d399";
+                    logStream("Cámara Web iniciada. Reconocimiento de falanges activo.");
+                } catch (err) {
+                    alert("No se pudo acceder a la cámara web. Asegúrate de otorgar permisos.");
+                    statusBadge.textContent = "Cámara: Error de Acceso";
+                }
+            } else {
+                cameraActive = false;
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(t => t.stop());
+                }
+                btnCamera.textContent = "📹 Iniciar Seguimiento por Cámara Web";
+                btnCamera.classList.remove('active');
+                statusBadge.textContent = "Cámara: Pausada";
+                pipCtx.clearRect(0, 0, pipCanvas.width, pipCanvas.height);
+                logStream("Cámara Web detenida.");
+            }
+        });
+
+        // Presets Manuales
+        document.getElementById('btn-open-hand').addEventListener('click', () => {
+            logStream("Comando directo: Extensión articular (0.0°)");
+            for (const k in jointsMap) rotateJoint(k, 0);
+        });
+
+        document.getElementById('btn-close-fist').addEventListener('click', () => {
+            logStream("Comando directo: Puño cerrado (90.0°)");
+            for (const k in jointsMap) rotateJoint(k, 85);
+        });
+
+        // Sliders Listeners
+        ['INDICE_PROXIMAL', 'INDICE_MEDIAL', 'INDICE_DISTAL',
+         'PULGAR_PROXIMAL', 'MEDIO_PROXIMAL', 'ANULAR_PROXIMAL', 'MENIQUE_PROXIMAL'].forEach(id => {
+            const input = document.getElementById('slide-' + id);
+            if (input) {
+                input.addEventListener('input', (e) => {
+                    rotateJoint(id, parseFloat(e.target.value));
+                });
+            }
+        });
+
+        // Rutina C++ pre-compilada
+        document.getElementById('btn-run-cpp-routine').addEventListener('click', () => {
+            logStream("Ejecutando trayectoria generada por compilador_mano.exe...");
+            const steps = [
+                { f: () => { rotateJoint("INDICE_PROXIMAL", 45); rotateJoint("INDICE_MEDIAL", 30); rotateJoint("INDICE_DISTAL", 20); }, msg: "FALANGE INDICE -> 45°, 30°, 20°" },
+                { f: () => { rotateJoint("PULGAR_PROXIMAL", 60); rotateJoint("MEDIO_PROXIMAL", 90); }, msg: "PULGAR -> 60° | MEDIO -> 90°" },
+                { f: () => { rotateJoint("ANULAR_PROXIMAL", 50); rotateJoint("MENIQUE_PROXIMAL", 70); }, msg: "ANULAR -> 50° | MENIQUE -> 70°" },
+                { f: () => { for (const k in jointsMap) rotateJoint(k, 0); }, msg: "RETORNO A POSICIÓN CERO (0°)" }
+            ];
+
+            steps.forEach((s, i) => {
+                setTimeout(() => {
+                    s.f();
+                    logStream(`[CUÁDRUPLA EJECUTADA]: ${s.msg}`);
+                }, i * 700);
+            });
+        });
+
+        // Window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Animation Render Loop (60 FPS)
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+
+            // Sutil respiración cinemática del robot
+            const t = Date.now() * 0.001;
+            handRoot.position.y = Math.sin(t) * 0.12;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
