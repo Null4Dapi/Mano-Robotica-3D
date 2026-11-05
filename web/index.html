@@ -191,6 +191,35 @@
                     </div>
                 </div>
 
+                <!-- Trajectory Playback Card (Semana 15 - Compilador Cinemático) -->
+                <div class="cyber-panel rounded-2xl p-3.5 w-64 sm:w-72">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-sky-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-code-branch"></i> Trayectoria Compilada
+                        </span>
+                        <span id="traj-frame-badge" class="text-[10px] mono px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/30">18 GDL</span>
+                    </div>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex gap-1.5">
+                            <button id="btn-fetch-traj" onclick="fetchTrajectoryJson()" class="flex-1 py-1.5 px-2 rounded-xl bg-sky-600/30 hover:bg-sky-500/40 border border-sky-500/50 text-[11px] font-medium text-sky-200 transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-download"></i> Cargar JSON
+                            </button>
+                            <label class="flex-1 py-1.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-[11px] font-medium text-slate-200 cursor-pointer transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-folder-open"></i> Subir Archivo
+                                <input type="file" id="traj-file-input" accept=".json" class="hidden" onchange="onTrajectoryFileSelected(event)">
+                            </label>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button id="btn-play-traj" onclick="toggleTrajectoryPlayback()" class="flex-1 py-1.5 px-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-500/40 border border-indigo-500/50 text-[11px] font-medium text-indigo-200 transition flex items-center justify-center gap-1">
+                                <i class="fa-solid fa-play"></i> <span id="lbl-play-traj">Reproducir</span>
+                            </button>
+                            <button onclick="stopTrajectory()" class="py-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:border-rose-500/40 border border-slate-700 text-[11px] text-slate-300 hover:text-rose-300 transition flex items-center justify-center">
+                                <i class="fa-solid fa-stop"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Material & Visual Options -->
                 <div class="cyber-panel rounded-2xl p-3.5 w-64 sm:w-72">
                     <div class="text-xs font-semibold uppercase tracking-wider text-sky-400 mb-2.5 flex items-center gap-1.5">
@@ -1114,6 +1143,151 @@
                 btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i>Demo Auto';
                 btn.className = 'text-[11px] px-2 py-0.5 rounded-lg bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 transition';
             }
+        }
+
+        /***********************************************************************
+         * 4.5 REPRODUCTOR DE TRAYECTORIA COMPILADA (SEMANA 15 - 18 GDL)
+         ***********************************************************************/
+        let loadedTrajectory = null;
+        let trajectoryPlayback = {
+            isPlaying: false,
+            frameIdx: 0,
+            timer: null
+        };
+
+        function applyTrajectoryJoints(joints) {
+            if (!joints) return;
+
+            // Muñeca (3 GDL)
+            if (joints.MUNICA_PITCH !== undefined) handState.wrist.target.pitch = THREE.MathUtils.degToRad(joints.MUNICA_PITCH);
+            if (joints.MUNICA_ROLL !== undefined)  handState.wrist.target.roll  = THREE.MathUtils.degToRad(joints.MUNICA_ROLL);
+            if (joints.MUNICA_YAW !== undefined)   handState.wrist.target.yaw   = THREE.MathUtils.degToRad(joints.MUNICA_YAW);
+
+            // 5 Dedos (15 GDL)
+            const fMap = {
+                'PULGAR': 'thumb',
+                'INDICE': 'index',
+                'MEDIO': 'middle',
+                'ANULAR': 'ring',
+                'MENIQUE': 'pinky'
+            };
+
+            for (const [prefix, id] of Object.entries(fMap)) {
+                const target = handState.fingers[id]?.target;
+                if (!target) continue;
+                if (joints[`${prefix}_PROXIMAL`] !== undefined) {
+                    target.mcp = THREE.MathUtils.degToRad(joints[`${prefix}_PROXIMAL`]);
+                }
+                if (joints[`${prefix}_MEDIAL`] !== undefined) {
+                    target.pip = THREE.MathUtils.degToRad(joints[`${prefix}_MEDIAL`]);
+                }
+                if (joints[`${prefix}_DISTAL`] !== undefined) {
+                    target.dip = THREE.MathUtils.degToRad(joints[`${prefix}_DISTAL`]);
+                }
+            }
+        }
+
+        function stepTrajectory() {
+            if (!trajectoryPlayback.isPlaying || !loadedTrajectory) return;
+            const frames = loadedTrajectory.frames;
+            if (!frames || frames.length === 0) return;
+
+            const idx = trajectoryPlayback.frameIdx;
+            const f = frames[idx];
+            applyTrajectoryJoints(f.articulaciones);
+
+            const badge = document.getElementById('traj-frame-badge');
+            if (badge) badge.textContent = `${idx + 1}/${frames.length} (${f.tiempo_ms}ms)`;
+
+            const gBadge = document.getElementById('gesture-badge');
+            if (gBadge) gBadge.innerHTML = `<i class="fa-solid fa-microchip text-sky-400"></i> TRAYECTORIA [${idx + 1}/${frames.length}] ${f.tiempo_ms}ms`;
+
+            if (idx + 1 < frames.length) {
+                const delay = Math.max(25, frames[idx + 1].tiempo_ms - f.tiempo_ms);
+                trajectoryPlayback.frameIdx++;
+                trajectoryPlayback.timer = setTimeout(stepTrajectory, delay);
+            } else {
+                updateStatusMessage(`Trayectoria completada (${frames.length} frames).`);
+                stopTrajectory();
+            }
+        }
+
+        function playTrajectory(data) {
+            if (!data || !data.frames || data.frames.length === 0) {
+                updateStatusMessage('Error: La trayectoria no contiene frames cinemáticos.');
+                return;
+            }
+            stopAutoDemoIfManual();
+            if (handState.cameraActive) stopWebcamTracking();
+
+            loadedTrajectory = data;
+            trajectoryPlayback.isPlaying = true;
+            trajectoryPlayback.frameIdx = 0;
+
+            const btn = document.getElementById('lbl-play-traj');
+            if (btn) btn.textContent = 'Pausar';
+
+            updateStatusMessage(`Reproduciendo trayectoria: ${data.programa || 'Compilada'} (${data.frames.length} frames, ${data.duracion_total_ms || 0}ms)`);
+            stepTrajectory();
+        }
+
+        function toggleTrajectoryPlayback() {
+            if (!loadedTrajectory) {
+                fetchTrajectoryJson();
+                return;
+            }
+            if (trajectoryPlayback.isPlaying) {
+                trajectoryPlayback.isPlaying = false;
+                if (trajectoryPlayback.timer) clearTimeout(trajectoryPlayback.timer);
+                const btn = document.getElementById('lbl-play-traj');
+                if (btn) btn.textContent = 'Reanudar';
+                updateStatusMessage('Reproducción de trayectoria pausada.');
+            } else {
+                trajectoryPlayback.isPlaying = true;
+                const btn = document.getElementById('lbl-play-traj');
+                if (btn) btn.textContent = 'Pausar';
+                if (trajectoryPlayback.frameIdx >= loadedTrajectory.frames.length - 1) {
+                    trajectoryPlayback.frameIdx = 0;
+                }
+                stepTrajectory();
+            }
+        }
+
+        function stopTrajectory() {
+            trajectoryPlayback.isPlaying = false;
+            if (trajectoryPlayback.timer) clearTimeout(trajectoryPlayback.timer);
+            trajectoryPlayback.frameIdx = 0;
+            const btn = document.getElementById('lbl-play-traj');
+            if (btn) btn.textContent = 'Reproducir';
+        }
+
+        async function fetchTrajectoryJson() {
+            updateStatusMessage('Obteniendo trayectoria.json...');
+            try {
+                const resp = await fetch('trayectoria.json');
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                playTrajectory(data);
+            } catch (err) {
+                console.warn('Fetch fallback:', err);
+                updateStatusMessage('No se pudo descargar trayectoria.json vía HTTP. Use el botón "Subir Archivo".');
+            }
+        }
+
+        function onTrajectoryFileSelected(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    playTrajectory(data);
+                } catch (err) {
+                    console.error('Error parseando JSON de trayectoria:', err);
+                    updateStatusMessage('Error al interpretar el archivo JSON de trayectoria.');
+                }
+            };
+            reader.readAsText(file);
         }
 
         /***********************************************************************
