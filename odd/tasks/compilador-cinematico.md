@@ -16,7 +16,7 @@ S8: "Cada que hagas una modificación a nivel de estructura de proyecto has los 
 - [x] T1 [S1, S8] Diseñar el núcleo común de tipos (Token, AST base) y el sistema de compilación Makefile en C++. | route: inline | commit: cd43cec
 - [x] T2 [S2] Implementar el módulo de análisis predictivo LL(1) con cálculo de PRIMERO, SIGUIENTE y tabla sintáctica. | route: worker | commit: 7f4b63f
 - [x] T3 [S3] Implementar el módulo de análisis ascendente LR(0) con gramática aumentada, autómata canónico y tablas ACTION/GOTO. | route: worker | commit: 1eb1adb
-- [ ] T4 [S4] Implementar las especificaciones Flex (scanner.l) y Bison (parser.y) para el DSL cinemático y construcción del AST. | route: worker | commit: pending
+- [x] T4 [S4] Implementar las especificaciones Flex (scanner.l) y Bison (parser.y) para el DSL cinemático y construcción del AST. | route: worker | commit: 1dae292
 - [ ] T5 [S5] Implementar la Tabla de Símbolos con ámbitos y el Analizador Semántico con verificación de tipos y rangos biomecánicos [0°, 90°]. | route: worker | commit: pending
 - [ ] T6 [S6] Implementar la generación de Código de Tres Direcciones (TAC) y la estructura de Cuádruplas a partir del AST. | route: worker | commit: pending
 - [ ] T7 [S7] Implementar el Optimizador de Bloques Básicos (folding, propagación, movimientos muertos) y exportador de trayectoria.json. | route: worker | commit: pending
