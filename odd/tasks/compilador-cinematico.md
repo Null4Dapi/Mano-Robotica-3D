@@ -20,7 +20,7 @@ S8: "Cada que hagas una modificación a nivel de estructura de proyecto has los 
 - [x] T5 [S5] Implementar la Tabla de Símbolos con ámbitos y el Analizador Semántico con verificación de tipos y rangos biomecánicos [0°, 90°]. | route: worker | commit: 23bb550
 - [x] T6 [S6] Implementar la generación de Código de Tres Direcciones (TAC) y la estructura de Cuádruplas a partir del AST. | route: worker | commit: e89936a
 - [x] T7 [S7] Implementar el Optimizador de Bloques Básicos (folding, propagación, movimientos muertos) y exportador de trayectoria.json. | route: worker | commit: c66f7e2
-- [ ] T8 [S7, S8] Implementar el CLI principal (main.cpp) con banderas de diagnóstico de semanas 10-15 y validar con el visor web 3D. | route: worker | commit: pending
+- [x] T8 [S7, S8] Implementar el CLI principal (main.cpp) con banderas de diagnóstico de semanas 10-15 y validar con el visor web 3D. | route: worker | commit: 0c32667
 
 ## Log
 L1: "Ya resolví los docs, todo conforme. Empieza hacer la planificación para el desarrollo completo del proyecto. Utiliza agente gentle ai, ODD, usa subagentes para que no se ocupe tu contexto, algo que acotar, es que RDD tiene un límite de tamaño para revisar, cada cambio importante debe entrar en ese tamaño para la revisión de RDD. No olvides trabajar con engram, aprovecha las skills según la necesidad."
