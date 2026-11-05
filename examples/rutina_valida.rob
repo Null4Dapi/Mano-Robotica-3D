@@ -1,0 +1,21 @@
+MOTOR ManoBionica_Completa;
+INICIO
+    // 1. Cerrar dedo índice suavemente
+    DEDO INDICE FALANGE PROXIMAL ROTAR 45;
+    DEDO INDICE FALANGE MEDIAL ROTAR 40;
+    DEDO INDICE FALANGE DISTAL ROTAR 30;
+
+    // 2. Flexión de pulgar y medio
+    DEDO PULGAR FALANGE PROXIMAL ROTAR 60;
+    DEDO MEDIO FALANGE PROXIMAL ROTAR 85;
+
+    // 3. Pausa cinemática
+    ESPERAR 300 MS;
+
+    // 4. Bloque iterativo para anular y meñique
+    REPETIR 2 VECES {
+        DEDO ANULAR FALANGE PROXIMAL ROTAR 50;
+        DEDO MENIQUE FALANGE PROXIMAL ROTAR 70;
+    }
+FIN
+
