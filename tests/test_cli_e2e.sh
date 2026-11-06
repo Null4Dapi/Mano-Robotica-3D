@@ -11,8 +11,8 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Limpiar archivos generados por la prueba al finalizar
-trap 'rm -f web/trayectoria.json' EXIT
+# Mantener web/trayectoria.json para la simulación del visor 3D web
+# (No borrar con trap al finalizar)
 
 TOTAL_TESTS=8
 PASSED_TESTS=0

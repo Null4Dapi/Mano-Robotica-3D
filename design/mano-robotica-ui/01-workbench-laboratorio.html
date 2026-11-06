@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mano Robótica 3D — Workbench de Laboratorio</title>
+  <style>
+    :root {
+      --bg-base: #121316;
+      --bg-surface: #1a1c20;
+      --bg-elevated: #22252b;
+      --bg-input: #15171a;
+      --border-subtle: #2d3139;
+      --border-strong: #3f444f;
+      --text-main: #f1f3f5;
+      --text-muted: #8b929e;
+      --text-faint: #575d69;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-subtle: rgba(37, 99, 235, 0.12);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      height: 48px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 24px;
+      height: 24px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-main);
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .telemetry-strip {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .telemetry-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--border-subtle);
+      border-color: var(--border-strong);
+    }
+
+    .btn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-icon {
+      padding: 5px 7px;
+    }
+
+    /* Main Layout */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sidebar - Controls */
+    .sidebar {
+      width: 320px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+
+    .sidebar-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+      width: 5px;
+    }
+    .sidebar-content::-webkit-scrollbar-thumb {
+      background: var(--border-subtle);
+      border-radius: 3px;
+    }
+
+    /* Finger Actuator Card */
+    .joint-group {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .joint-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .joint-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .joint-total {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .joint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .joint-sublabel {
+      font-size: 11px;
+      color: var(--text-muted);
+      width: 44px;
+    }
+
+    .slider-track {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      background: var(--border-subtle);
+      border-radius: 2px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-main);
+      cursor: pointer;
+      border: 1px solid var(--border-strong);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    input[type="range"]:focus-visible {
+      outline: 2px solid var(--accent);
+    }
+
+    .joint-val {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-main);
+      width: 28px;
+      text-align: right;
+    }
+
+    /* Viewport Area */
+    .viewport {
+      flex: 1;
+      position: relative;
+      background: radial-gradient(circle at center, #181a1f 0%, #0d0e11 100%);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Canvas simulation */
+    #hand-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+
+    #hand-canvas:active {
+      cursor: grabbing;
+    }
+
+    /* Viewport Overlay Controls */
+    .viewport-topbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .viewport-topbar > * {
+      pointer-events: auto;
+    }
+
+    .segmented-control {
+      display: inline-flex;
+      background: rgba(26, 28, 32, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 2px;
+    }
+
+    .segmented-btn {
+      font-size: 11px;
+      font-family: var(--font-sans);
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .segmented-btn.active {
+      background: var(--bg-elevated);
+      color: var(--text-main);
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Bottom Trajectory Strip */
+    .timeline-bar {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      background: rgba(26, 28, 32, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      z-index: 4;
+    }
+
+    .timeline-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timeline-scrubber {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .timeline-info {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Mini PiP Vision Camera */
+    .pip-cam {
+      position: absolute;
+      top: 50px;
+      right: 12px;
+      width: 190px;
+      background: rgba(21, 23, 26, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 4;
+    }
+
+    .pip-header {
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .pip-video-box {
+      width: 100%;
+      height: 106px;
+      background: #090a0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .pip-placeholder-text {
+      font-size: 10px;
+      color: var(--text-faint);
+      text-align: center;
+      padding: 8px;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 900px) {
+      .sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease-in-out;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .telemetry-strip {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-mark">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/>
+          <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v7"/>
+          <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/>
+          <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>
+        </svg>
+      </div>
+      <span class="brand-title">MANO ROBÓTICA</span>
+      <span class="brand-tag">18 GDL • C++ KINEMATICS</span>
+    </div>
+
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span class="status-dot"></span>
+        <span>SISTEMA NOMINAL</span>
+      </div>
+      <div class="telemetry-item">
+        <span>FPS:</span> <strong style="color: var(--text-main);">60.0</strong>
+      </div>
+      <div class="telemetry-item">
+        <span>RANGO ARTICULAR:</span> <span>[0°, 90°]</span>
+      </div>
+      <div class="telemetry-item">
+        <span>TRAYECTORIA:</span> <span id="traj-status">COMPILADA (48 FRAMES)</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn" id="btn-toggle-pip" title="Alternar monitor óptico">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+        Sensor Óptico
+      </button>
+      <button class="btn btn-primary" id="btn-export">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Exportar JSON
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Container -->
+  <main class="workspace">
+
+    <!-- Actuators & Joints Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="section-title">Articulaciones (18 GDL)</span>
+        <button class="btn btn-icon" id="btn-reset-joints" title="Restablecer posición cero">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+
+        <!-- Pulgar -->
+        <div class="joint-group">
+          <div class="joint-group-header">
+            <span class="joint-name">Pulgar</span>
+            <span class="joint-total" id="val-pulgar-total">24° avg</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">MCP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="25" oninput="updateVal(this, 'p-mcp')"></div>
+            <span class="joint-val" id="p-mcp">25°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">PIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="20" oninput="updateVal(this, 'p-pip')"></div>
+            <span class="joint-val" id="p-pip">20°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">DIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="15" oninput="updateVal(this, 'p-dip')"></div>
+            <span class="joint-val" id="p-dip">15°</span>
+          </div>
+        </div>
+
+        <!-- Índice -->
+        <div class="joint-group">
+          <div class="joint-group-header">
+            <span class="joint-name">Índice</span>
+            <span class="joint-total" id="val-indice-total">35° avg</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">MCP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="40" oninput="updateVal(this, 'i-mcp')"></div>
+            <span class="joint-val" id="i-mcp">40°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">PIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="35" oninput="updateVal(this, 'i-pip')"></div>
+            <span class="joint-val" id="i-pip">35°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">DIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="30" oninput="updateVal(this, 'i-dip')"></div>
+            <span class="joint-val" id="i-dip">30°</span>
+          </div>
+        </div>
+
+        <!-- Medio -->
+        <div class="joint-group">
+          <div class="joint-group-header">
+            <span class="joint-name">Medio</span>
+            <span class="joint-total">38° avg</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">MCP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="45" oninput="updateVal(this, 'm-mcp')"></div>
+            <span class="joint-val" id="m-mcp">45°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">PIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="40" oninput="updateVal(this, 'm-pip')"></div>
+            <span class="joint-val" id="m-pip">40°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">DIP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="30" oninput="updateVal(this, 'm-dip')"></div>
+            <span class="joint-val" id="m-dip">30°</span>
+          </div>
+        </div>
+
+        <!-- Anular & Meñique -->
+        <div class="joint-group">
+          <div class="joint-group-header">
+            <span class="joint-name">Anular & Meñique</span>
+            <span class="joint-total">42° avg</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">A-MCP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="45" oninput="updateVal(this, 'a-mcp')"></div>
+            <span class="joint-val" id="a-mcp">45°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">ME-MCP</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="50" oninput="updateVal(this, 'me-mcp')"></div>
+            <span class="joint-val" id="me-mcp">50°</span>
+          </div>
+        </div>
+
+        <!-- Muñeca -->
+        <div class="joint-group">
+          <div class="joint-group-header">
+            <span class="joint-name">Orientación Muñeca</span>
+            <span class="joint-total">Pitch / Roll</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">Pitch</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="10" oninput="updateVal(this, 'w-pitch')"></div>
+            <span class="joint-val" id="w-pitch">10°</span>
+          </div>
+          <div class="joint-row">
+            <span class="joint-sublabel">Roll</span>
+            <div class="slider-track"><input type="range" min="0" max="90" value="0" oninput="updateVal(this, 'w-roll')"></div>
+            <span class="joint-val" id="w-roll">0°</span>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- 3D Canvas Viewport -->
+    <section class="viewport">
+
+      <!-- Viewport Top Controls -->
+      <div class="viewport-topbar">
+        <div class="segmented-control">
+          <button class="segmented-btn active" onclick="setCamView('persp')">Perspectiva</button>
+          <button class="segmented-btn" onclick="setCamView('top')">Superior</button>
+          <button class="segmented-btn" onclick="setCamView('side')">Lateral</button>
+          <button class="segmented-btn" onclick="setCamView('front')">Frontal</button>
+        </div>
+
+        <div class="segmented-control">
+          <button class="segmented-btn active" id="btn-wireframe">Malla Alambre</button>
+          <button class="segmented-btn" id="btn-shading">Sólido Mate</button>
+          <button class="segmented-btn" id="btn-axes">Ejes</button>
+        </div>
+      </div>
+
+      <!-- Canvas rendering -->
+      <canvas id="hand-canvas"></canvas>
+
+      <!-- PiP Camera Feed Preview -->
+      <div class="pip-cam" id="pip-window">
+        <div class="pip-header">
+          <span>Tracking Óptico</span>
+          <span style="color: var(--success);">Activo</span>
+        </div>
+        <div class="pip-video-box">
+          <svg width="64" height="64" viewBox="0 0 100 100" fill="none" stroke="#2563eb" stroke-width="1.5">
+            <circle cx="50" cy="50" r="4" fill="#2563eb"/>
+            <line x1="50" y1="50" x2="35" y2="35"/>
+            <circle cx="35" cy="35" r="3"/>
+            <line x1="50" y1="50" x2="45" y2="25"/>
+            <circle cx="45" cy="25" r="3"/>
+            <line x1="50" y1="50" x2="55" y2="25"/>
+            <circle cx="55" cy="25" r="3"/>
+            <line x1="50" y1="50" x2="65" y2="35"/>
+            <circle cx="65" cy="35" r="3"/>
+            <line x1="50" y1="50" x2="25" y2="55"/>
+            <circle cx="25" cy="55" r="3"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Bottom Timeline Playback -->
+      <div class="timeline-bar">
+        <div class="timeline-controls">
+          <button class="btn btn-icon" id="btn-play-pause" title="Reproducir trayectoria">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+          </button>
+          <button class="btn btn-icon" id="btn-step-back" title="Paso anterior">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+          </button>
+          <button class="btn btn-icon" id="btn-step-next" title="Paso siguiente">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="timeline-scrubber">
+          <input type="range" id="trajectory-scrubber" min="0" max="48" value="18">
+          <div class="timeline-info">
+            <span>PASO: <strong id="step-count" style="color: var(--text-main);">18 / 48</strong></span>
+            <span>TIEMPO: <strong>01.44s</strong> (1x)</span>
+            <span>MOVIMIENTO: <strong>PINZA DE PRECISIÓN (OK)</strong></span>
+          </div>
+        </div>
+
+        <div class="segmented-control" style="align-self: flex-end;">
+          <button class="segmented-btn">0.5x</button>
+          <button class="segmented-btn active">1.0x</button>
+          <button class="segmented-btn">2.0x</button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script>
+    // Slider value update helper
+    function updateVal(slider, targetId) {
+      document.getElementById(targetId).textContent = slider.value + '°';
+      drawHand();
+    }
+
+    function setCamView(mode) {
+      const btns = document.querySelectorAll('.segmented-control:first-child .segmented-btn');
+      btns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      drawHand();
+    }
+
+    // Toggle PiP
+    const pipBtn = document.getElementById('btn-toggle-pip');
+    const pipWin = document.getElementById('pip-window');
+    pipBtn.addEventListener('click', () => {
+      pipWin.style.display = pipWin.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // 2D High-Fidelity Technical Wireframe Simulation of the Robotic Hand
+    const canvas = document.getElementById('hand-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = canvas.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.clientHeight * window.devicePixelRatio;
+      drawHand();
+    }
+    window.addEventListener('resize', resize);
+
+    function drawHand() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Technical metric grid
+      ctx.strokeStyle = '#1d2127';
+      ctx.lineWidth = 1;
+      const step = 40 * window.devicePixelRatio;
+      for (let x = 0; x < w; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 0; y < h; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Base coordinate origin
+      const cx = w * 0.52;
+      const cy = h * 0.65;
+      const scale = Math.min(w, h) * 0.0022;
+
+      // Draw Wrist Block
+      ctx.strokeStyle = '#475569';
+      ctx.fillStyle = '#1e293b';
+      ctx.lineWidth = 2 * window.devicePixelRatio;
+
+      // Wrist
+      ctx.beginPath();
+      ctx.roundRect(cx - 50 * scale, cy, 100 * scale, 50 * scale, 8 * scale);
+      ctx.fill();
+      ctx.stroke();
+
+      // Palm
+      ctx.fillStyle = '#0f172a';
+      ctx.strokeStyle = '#64748b';
+      ctx.beginPath();
+      ctx.roundRect(cx - 65 * scale, cy - 90 * scale, 130 * scale, 90 * scale, 10 * scale);
+      ctx.fill();
+      ctx.stroke();
+
+      // Finger kinematics nodes
+      const fingers = [
+        { name: 'Pulgar', base: [-55, -40], angles: [25, 20, 15], len: [25, 22, 18], baseAngle: -0.7 },
+        { name: 'Índice', base: [-40, -90], angles: [40, 35, 30], len: [35, 26, 20], baseAngle: -0.15 },
+        { name: 'Medio',  base: [-12, -95], angles: [45, 40, 30], len: [38, 28, 22], baseAngle: 0.0 },
+        { name: 'Anular', base: [16, -92], angles: [45, 35, 25], len: [34, 25, 20], baseAngle: 0.12 },
+        { name: 'Meñique', base: [42, -85], angles: [50, 40, 30], len: [28, 20, 16], baseAngle: 0.25 }
+      ];
+
+      fingers.forEach(f => {
+        let currX = cx + f.base[0] * scale;
+        let currY = cy + f.base[1] * scale;
+        let currentAngle = -Math.PI / 2 + f.baseAngle;
+
+        // Base knuckle
+        ctx.fillStyle = '#2563eb';
+        ctx.beginPath();
+        ctx.arc(currX, currY, 4 * window.devicePixelRatio, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let i = 0; i < 3; i++) {
+          const bendRad = (f.angles[i] * Math.PI) / 180 * 0.4;
+          currentAngle += (f.baseAngle < 0 ? -bendRad : bendRad);
+          const nextX = currX + Math.cos(currentAngle) * f.len[i] * scale;
+          const nextY = currY + Math.sin(currentAngle) * f.len[i] * scale;
+
+          // Phalanx segment
+          ctx.strokeStyle = '#94a3b8';
+          ctx.lineWidth = (4 - i) * window.devicePixelRatio;
+          ctx.beginPath();
+          ctx.moveTo(currX, currY);
+          ctx.lineTo(nextX, nextY);
+          ctx.stroke();
+
+          // Joint circle
+          ctx.fillStyle = i === 2 ? '#38bdf8' : '#e2e8f0';
+          ctx.beginPath();
+          ctx.arc(nextX, nextY, (3.5 - i * 0.5) * window.devicePixelRatio, 0, Math.PI * 2);
+          ctx.fill();
+
+          currX = nextX;
+          currY = nextY;
+        }
+      });
+    }
+
+    setTimeout(resize, 50);
+  </script>
+</body>
+</html>

@@ -21,6 +21,10 @@ S8: "Cada que hagas una modificación a nivel de estructura de proyecto has los 
 - [x] T6 [S6] Implementar la generación de Código de Tres Direcciones (TAC) y la estructura de Cuádruplas a partir del AST. | route: worker | commit: e89936a
 - [x] T7 [S7] Implementar el Optimizador de Bloques Básicos (folding, propagación, movimientos muertos) y exportador de trayectoria.json. | route: worker | commit: c66f7e2
 - [x] T8 [S7, S8] Implementar el CLI principal (main.cpp) con banderas de diagnóstico de semanas 10-15 y validar con el visor web 3D. | route: worker | commit: 0c32667
+- [x] T9 [S7, S8] Implementar el rediseño sobrio y monocromático del visor 3D en web/index.html basado en el artboard elegido (design/mano-robotica-ui/03-split-consola.html). | route: worker
 
 ## Log
 L1: "Ya resolví los docs, todo conforme. Empieza hacer la planificación para el desarrollo completo del proyecto. Utiliza agente gentle ai, ODD, usa subagentes para que no se ocupe tu contexto, algo que acotar, es que RDD tiene un límite de tamaño para revisar, cada cambio importante debe entrar en ese tamaño para la revisión de RDD. No olvides trabajar con engram, aprovecha las skills según la necesidad."
+L2: "Quiero hacer un rediseño de la web del proyecto. Tiene un diseño muy IA loop. Debería ser minimalista, sobrio, responsive." -> Creadas 3 direcciones en design/mano-robotica-ui/ (01-workbench-laboratorio.html, 02-minimal-focus.html, 03-split-consola.html).
+L3: "Implement the design artboard design/mano-robotica-ui/03-split-consola.html" -> Elegido el artboard 03-split-consola.html (Consola Split Cinemática). Iniciada la tarea T9 para trasladar el diseño a web/index.html.
+L4: "Handoff completado: implementado en web/index.html preservando el modelo Three.js y MediaPipe, verificado en http://127.0.0.1:8000/."

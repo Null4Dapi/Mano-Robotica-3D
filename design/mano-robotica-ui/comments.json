@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "comments": [
+    {
+      "id": "nfb1rq0s",
+      "file": "03-split-consola.html",
+      "selector": "#three-canvas",
+      "excerpt": "",
+      "comment": "Buena composición del view, pero no veo una propuesta de movimiento 3d para la interfaz. Por ejemplo botónes flotantes (minimalista) para el zoom, botones flotantes moverse en el 3D",
+      "createdAt": "2026-11-06T18:04:58.788Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:07:29.974Z",
+      "resolvedAt": "2026-11-06T18:09:30.090Z"
+    },
+    {
+      "id": "1dib1x6g",
+      "file": "03-split-consola.html",
+      "selector": "body > header > div:nth-of-type(2) > div:nth-of-type(3)",
+      "excerpt": "FPS: 60.0",
+      "comment": "No es necesario esta información, es irrelevante para el proyecto",
+      "createdAt": "2026-11-06T18:05:46.627Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:07:29.974Z",
+      "resolvedAt": "2026-11-06T18:09:30.090Z"
+    },
+    {
+      "id": "l7cm234j",
+      "file": "03-split-consola.html",
+      "selector": "body > header > div:nth-of-type(2) > div:nth-of-type(1)",
+      "excerpt": "ONLINE",
+      "comment": "El botón de online también es irrelevante",
+      "createdAt": "2026-11-06T18:06:06.557Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:07:29.974Z",
+      "resolvedAt": "2026-11-06T18:09:30.090Z"
+    },
+    {
+      "id": "ujqtkzat",
+      "file": "03-split-consola.html",
+      "selector": "body > header > div:nth-of-type(3) > button:nth-of-type(1)",
+      "excerpt": "Sensor Óptico",
+      "comment": "Este botón está demás",
+      "createdAt": "2026-11-06T18:06:33.094Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:07:29.974Z",
+      "resolvedAt": "2026-11-06T18:09:30.090Z"
+    },
+    {
+      "id": "sztiw9j9",
+      "file": "03-split-consola.html",
+      "selector": "#pane-servos",
+      "excerpt": "Dedo Pulgar MCP: 25° • PIP: 20° • DIP: 15° MCP 25° PIP 20° DIP 15° Dedo Índice MCP: 40° • PIP: 35° • DIP: 30° MCP 40° PIP 35° DIP 30° Dedo Medio MCP: 45° • PIP: 40° • DIP: 25° MCP 45° PIP 40° DIP 25° Anular y Meñique 45° / 50° Anular 45° Meñique 50°",
+      "comment": "Este panel lateral debería estar oculto, y poder despegarse a través de una barra lateral minimalista.",
+      "createdAt": "2026-11-06T18:12:53.672Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:15:21.957Z",
+      "resolvedAt": "2026-11-06T18:18:36.929Z"
+    },
+    {
+      "id": "7479leuv",
+      "file": "03-split-consola.html",
+      "selector": "body > main > aside > div:nth-of-type(1) > button:nth-of-type(1)",
+      "excerpt": "Articulaciones (18)",
+      "comment": "Estos páneles debería estar en una barra vetical. Debería tener un ícono para identificarlos rápidamente.",
+      "createdAt": "2026-11-06T18:13:45.912Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:15:21.957Z",
+      "resolvedAt": "2026-11-06T18:18:36.929Z"
+    },
+    {
+      "id": "1jlyk78m",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(2) > div:nth-of-type(1)",
+      "excerpt": "1:1",
+      "comment": "Este botón de zoom está feo.",
+      "createdAt": "2026-11-06T18:14:45.091Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:15:21.957Z",
+      "resolvedAt": "2026-11-06T18:18:36.929Z"
+    },
+    {
+      "id": "ddav4odc",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(2) > div:nth-of-type(2)",
+      "excerpt": "",
+      "comment": "Este botón de \"giroscopio\" está desproporcionado.",
+      "createdAt": "2026-11-06T18:15:06.995Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:15:21.957Z",
+      "resolvedAt": "2026-11-06T18:18:36.929Z"
+    },
+    {
+      "id": "bsrkhdg6",
+      "file": "03-split-consola.html",
+      "selector": "body > header > div:nth-of-type(1) > div",
+      "excerpt": "3D",
+      "comment": "Quita este apartado de ícono.",
+      "createdAt": "2026-11-06T18:49:21.084Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "nozgvdg2",
+      "file": "03-split-consola.html",
+      "selector": "#side-drawer > div:nth-of-type(2)",
+      "excerpt": "Dedo Pulgar MCP: 25° • PIP: 20° • DIP: 15° MCP 25° PIP 20° DIP 15° Dedo Índice MCP: 40° • PIP: 35° • DIP: 30° MCP 40° PIP 35° DIP 30° Dedo Medio MCP: 45° • PIP: 40° • DIP: 25° MCP 45° PIP 40° DIP 25° Anular y Meñique 45° / 50° Anular 45° Meñique 50°",
+      "comment": "Los colores deben ser monocromático, es decir, tonos negro, grises, blancos.",
+      "createdAt": "2026-11-06T18:51:18.414Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "hx35697c",
+      "file": "03-split-consola.html",
+      "selector": "#side-drawer > div:nth-of-type(2)",
+      "excerpt": "ESTADO DETECCIÓN Mano Derecha (98%) INFERENCIA MEDIAPIPE 8.4 ms LANDMARKS 3D 21 puntos OK MODO OPERACIÓN Espejo Directo Pausar Detección Óptica",
+      "comment": "Mejora estos paneles, están solo acomodados como sea. Todo amontonado y no aprovecha el espacio libre",
+      "createdAt": "2026-11-06T18:52:26.383Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "h8la4px2",
+      "file": "03-split-consola.html",
+      "selector": "#side-drawer > div:nth-of-type(2)",
+      "excerpt": "Código Intermedio generado por el compilador cinemático (Semanas 14-15): # Operador Arg 1 Arg 2 Resultado (0) ASSIGN 25.0 - PULGAR_MCP (1) PARAM_ROT PULGAR_MCP t0 JOINT_ROT_1 (2) ASSIGN 40.0 - INDICE_MCP (3) INTERP_LIN 0.0 40.0 FRAME_STEP (4) COMMIT_TRAJ 48_FRAMES - trayectoria.json Recargar .rob De",
+      "comment": "Este apartado de tabla está muy apretado, no hay posibilidad de expandir de tamaño la barra lateral, además. los botónes están feos, los colores y la accesibilidad, así mismo el contraste.",
+      "createdAt": "2026-11-06T18:53:43.069Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "anpss39a",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(2) > div:nth-of-type(1)",
+      "excerpt": "",
+      "comment": "El botón de zoom debería estar en la parte inferior izquierda.",
+      "createdAt": "2026-11-06T18:54:18.962Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "uwrcyuqb",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(2) > div:nth-of-type(2)",
+      "excerpt": "",
+      "comment": "Sigue sin agradarme esta propuesta de botón de movilidad.",
+      "createdAt": "2026-11-06T18:54:44.116Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T18:55:05.323Z",
+      "resolvedAt": "2026-11-06T19:00:56.371Z"
+    },
+    {
+      "id": "82jqk535",
+      "file": "03-split-consola.html",
+      "selector": "#three-canvas",
+      "excerpt": "",
+      "comment": "La distribución de botónes en la barra superior es fatal, todo está amontonado en la izquierda superior",
+      "createdAt": "2026-11-06T19:13:16.596Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:16:03.922Z",
+      "resolvedAt": "2026-11-06T19:21:08.687Z"
+    },
+    {
+      "id": "9inhyy9f",
+      "file": "03-split-consola.html",
+      "selector": "body > main > nav > button:nth-of-type(4)",
+      "excerpt": "Centrar Cámara",
+      "comment": "Este botón está para nada. Qué hace?? Por qué está en la barra lateral??",
+      "createdAt": "2026-11-06T19:14:17.910Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:16:03.922Z",
+      "resolvedAt": "2026-11-06T19:21:08.687Z"
+    },
+    {
+      "id": "jlnwdw02",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(5)",
+      "excerpt": "20 / 48 (1.2s) 1.0x",
+      "comment": "Qué hace esta barra inferior??? La presentación no es la adecuada.",
+      "createdAt": "2026-11-06T19:14:35.580Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:16:03.922Z",
+      "resolvedAt": "2026-11-06T19:21:08.687Z"
+    },
+    {
+      "id": "e9w9nivw",
+      "file": "03-split-consola.html",
+      "selector": "body > header > div:nth-of-type(3) > button",
+      "excerpt": "Compilar Trayectoria",
+      "comment": "Este botón debería reaccionar. En estado normal debe ser un botón simple, sin color de fondo, letras blancas, línea blanca del recuadro. Y cuando el mouse se coloca encima el botón reacciona y se pone fondo blanco y letra negra.",
+      "createdAt": "2026-11-06T19:16:01.431Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:16:03.922Z",
+      "resolvedAt": "2026-11-06T19:21:08.687Z"
+    },
+    {
+      "id": "3i89j0am",
+      "file": "03-split-consola.html",
+      "selector": "body > main > section > div:nth-of-type(1)",
+      "excerpt": "Isométrica Superior Lateral Frontal",
+      "comment": "Está mal planteado, no se debería activar todos a la vez",
+      "createdAt": "2026-11-06T19:30:26.692Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:31:18.793Z",
+      "resolvedAt": "2026-11-06T19:32:48.042Z"
+    },
+    {
+      "id": "8toazn4r",
+      "file": "03-split-consola.html",
+      "selector": "#three-canvas",
+      "excerpt": "",
+      "comment": "Una consulta, la mano que se presenta en este canvas, es solo de ejemplo, no? En verdad se usará el original de mi proyecto, no?",
+      "createdAt": "2026-11-06T19:46:56.951Z",
+      "status": "resolved",
+      "sentAt": "2026-11-06T19:47:39.520Z",
+      "resolvedAt": "2026-11-06T19:48:19.957Z"
+    }
+  ]
+}

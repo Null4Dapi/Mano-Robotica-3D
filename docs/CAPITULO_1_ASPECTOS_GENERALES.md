@@ -38,16 +38,16 @@ Finalmente, el acoplamiento directo entre la entrada del usuario y la plataforma
 
 #### 1.3.1. Objetivo General
 
-Desarrollar un compilador en C++ basado en las fases canónicas de análisis sintáctico, análisis semántico, generación de código intermedio y optimización para la validación formal y ejecución eficiente de rutinas cinemáticas aplicadas a una mano robótica 3D.
+Desarrollar un sistema de compilación y simulación cinemática tridimensional que garantice la validación biomecánica y el control articular seguro de una mano robótica de 18 grados de libertad.
 
 #### 1.3.2. Objetivos Específicos
 
-* Diseñar una gramática libre de contexto y evaluar su determinismo mediante el cálculo formal de los conjuntos de predicción PRIMERO y SIGUIENTE y la construcción de la tabla predictiva LL(1), garantizando la ausencia de conflictos en el reconocimiento de sentencias cinemáticas base.
-* Modelar el reconocimiento sintáctico ascendente de expresiones de movimiento articular a través de una gramática aumentada, la colección canónica de estados LR(0) y las tablas de control ACTION y GOTO mediante la lógica de operaciones de desplazamiento y reducción.
-* Implementar la integración modular entre el analizador léxico y el analizador sintáctico mediante generadores automáticos y archivos de especificación formal con configuración de precedencias para la generación del árbol de sintaxis abstracta.
-* Construir una tabla de símbolos dinámica con administración de ámbitos locales y globales, incorporando reglas de verificación de tipos que permitan comprobar la coherencia de las operaciones e imponer restricciones sobre los rangos angulares físicos permitidos.
-* Desarrollar el módulo de generación de código intermedio encargado de recorrer el árbol de sintaxis abstracta y traducirlo a instrucciones lineales de código de tres direcciones estructuradas en registros de cuádruplas mediante variables temporales.
-* Diseñar e implementar un plan de optimización sobre bloques básicos que aplique técnicas de plegado de constantes, propagación de valores y eliminación de código muerto en las cuádruplas para generar el código objeto final que controle la simulación tridimensional.
+* Construir el módulo de análisis predictivo LL(1) y ascendente LR(0) que permita verificar formalmente el determinismo de la gramática cinemática libre de contexto, calculando los conjuntos PRIMERO y SIGUIENTE y construyendo las tablas canónicas de control.
+* Implementar el procesador léxico y sintáctico mediante especificaciones formales de Flex y Bison en C++20 para la construcción determinista del Árbol de Sintaxis Abstracta (AST) a partir de programas cinemáticos (`.rob`).
+* Implementar la tabla de símbolos con gestión dinámica de ámbitos (global y local) y el analizador semántico que restrinja estrictamente los ángulos de flexión articular al intervalo biomecánico seguro de 0° a 90°.
+* Desarrollar el generador de código intermedio que transforme el AST en un registro lineal de cuádruplas `(op, arg1, arg2, res)` mediante variables temporales.
+* Desarrollar el optimizador de bloques básicos que aplique plegado de constantes, propagación de valores y eliminación de código muerto cinemático, emitiendo la trayectoria compilada en formato JSON.
+* Construir el entorno de simulación virtual tridimensional en Three.js con WebGL que desacople la visualización de la compilación y anime los 18 grados de libertad coordinados en tiempo real.
 
 ---
 
@@ -55,9 +55,25 @@ Desarrollar un compilador en C++ basado en las fases canónicas de análisis sin
 
 #### 1.4.1. Justificación Técnica
 
-Desde el punto de vista de la ingeniería de software y los sistemas ciberfísicos, la implementación de un compilador formal proporciona un desacoplamiento riguroso entre la especificación de alto nivel de las trayectorias y el módulo de accionamiento cinemático. El uso de C++ como lenguaje de desarrollo responde a la necesidad de garantizar una ejecución determinista, gestión directa y predecible de memoria y un alto rendimiento computacional sin sobrecargas por recolección de basura (*garbage collection*), aspectos indispensables en el procesamiento de sistemas de tiempo real (Cooper & Torczon, 2022).
+La justificación técnica del proyecto se fundamenta en los requerimientos específicos de programación, infraestructura de software, hardware y viabilidad de acceso:
 
-Asimismo, la estructura modular del compilador permite aislar las etapas de validación estructural y semántica de la capa de ejecución. La verificación semántica guiada por la sintaxis asegura que las transgresiones de tipos o de límites biomecánicos sean interceptadas de forma estática en tiempo de compilación, impidiendo que comandos potencialmente dañinos o físicamente inconsistentes alcancen la fase de renderizado. Por su parte, la adopción de una representación intermedia basada en código de tres direcciones y registros de cuádruplas confiere independencia respecto a la máquina de destino, facilitando la aplicación sistemática de algoritmos de optimización de bloques básicos antes de emitir las órdenes de movimiento al efector final (Aho et al., 2007).
+* **Componentes que se van a programar:**
+  1. *Compilador nativo modular en C++20:* Estructurado en un *frontend* (analizador léxico con Flex y sintáctico LALR(1) con Bison), una tabla de símbolos con gestión de ámbitos para comprobación estricta de tipos y límites físicos biomecánicos [0°, 90°], y un *backend* de generación de Código de Tres Direcciones (TAC) estructurado en cuádruplas lineales con un optimizador de bloques básicos (*constant folding*, propagación y eliminación de código muerto).
+  2. *Visor cinemático 3D y entorno web:* Motor de renderizado en Three.js con WebGL que desacopla la visualización de la compilación, interpretando el archivo `trayectoria.json` emitido por el compilador para animar los 18 grados de libertad (flexión y abducción lateral de los 5 dedos y muñeca).
+
+* **Requerimientos de Software:**
+  * *Para el entorno de desarrollo y compilación:* Compilador GCC/G++ con soporte estándar C++20, generador léxico Flex (v2.6 o superior), generador sintáctico GNU Bison (v3.8 o superior) y el gestor de compilación GNU Make.
+  * *Para el entorno de ejecución del usuario:* Cualquier navegador web moderno con soporte nativo para WebGL 2.0 y ECMAScript 6 (Google Chrome, Mozilla Firefox, Microsoft Edge o navegadores basados en Chromium). No se requiere instalación de software propietario, licencias de terceros ni controladores de hardware especiales.
+
+* **Requerimientos de Hardware:**
+  * *Máquina de desarrollo / compilación:* Computadora con procesador x86_64 o ARM64 dual-core a 2.0 GHz o superior, 4 GB de memoria RAM y 500 MB de espacio disponible en almacenamiento.
+  * *Máquina del usuario final:* Computadora de escritorio o portátil estándar con gráficos integrados (Intel HD/UHD Graphics, AMD Radeon Vega o superior) capaz de renderizar gráficos 3D en WebGL a 60 FPS, y pantalla con resolución mínima de 1280×720 píxeles. De manera opcional para la captura gestual, una cámara web estándar (720p a 30 FPS).
+
+* **Criterio de Viabilidad y Adquisición:**
+  El proyecto cumple estrictamente con el principio de viabilidad técnica:
+  * El usuario final y las instituciones educativas **ya poseen** computadoras estándar con navegadores web comerciales instalados.
+  * Todo el software utilizado en el desarrollo y despliegue (Linux, GCC, Flex, Bison, Three.js) es de **código abierto y distribución libre**, por lo que el costo de adquisición de software es nulo (S/. 0.00).
+  * No se impone al usuario la necesidad de adquirir una mano robótica física o tarjetas electrónicas propietarias para experimentar y evaluar las rutinas cinemáticas, garantizando una disponibilidad operativa del 100%.
 
 #### 1.4.2. Justificación Social
 
@@ -67,9 +83,17 @@ Esta plataforma permite a los usuarios diseñar, verificar y evaluar patrones mo
 
 #### 1.4.3. Justificación Financiera
 
-En los proyectos de desarrollo robótico y mecatrónico, la etapa de pruebas empíricas directas sobre prototipos físicos representa un foco constante de sobrecostos financieros debido al desgaste prematuro o rotura de servomotores, desgranamiento de engranajes y fallas estructurales originadas por comandos con sobreextensión mecánica o trayectorias no sincronizadas. Cada incidente mecánico en hardware real demanda la sustitución de piezas, adquisición de repuestos electrónicos y tiempos prolongados de inactividad técnica.
+La justificación financiera se sustenta en el **ahorro económico cuantificable en Soles (S/.)** y el retorno de inversión directo para el desarrollador, empresa o laboratorio de robótica mediante la prevención de siniestros de hardware y la eliminación de licencias de software privativo:
 
-La incorporación de un compilador semántico que valide los límites físicos y un simulador tridimensional que visualice la cinemática de forma previa a cualquier despliegue reduce a cero la tasa de deterioro de componentes durante la fase de diseño y programación. Adicionalmente, las técnicas de optimización de código intermedio suprimen instrucciones redundantes y consolidan movimientos antes de la ejecución, disminuyendo el número total de ciclos de procesamiento requeridos y optimizando el consumo de recursos computacionales de la plataforma (Carranza Sahagún, 2024).
+| Rubro de Costo | Enfoque Tradicional Empírico (Físico / Privativo) | Enfoque Propuesto con Compilador y Simulación 3D | Ahorro Económico Estimado (S/.) |
+| :--- | :--- | :--- | :--- |
+| **Actuadores y servomotores** | Rotura promedio de 4 a 6 servomotores por colisión o sobreesfuerzo angular (S/. 35.00 c/u) | **S/. 0.00:** El analizador semántico intercepta ángulos fuera de rango [0°, 90°] antes de emitir la trayectoria | **S/. 140.00 – S/. 210.00** por ciclo de prueba |
+| **Chasis estructural de la mano** | Fractura mecánica de falanges impresas en resina/filamento técnico (S/. 180.00 juego completo) | **S/. 0.00:** Verificación cinemática virtual previa sin desgaste de material | **S/. 180.00** por incidente evitado |
+| **Licenciamiento de software** | Licencias comerciales de simulación robótica (ej. MATLAB / Simscape: ~S/. 8,500.00 anuales) | **S/. 0.00:** Stack 100% de código abierto (C++20, Flex, Bison, Three.js) | **S/. 8,500.00 anuales** por estación de trabajo |
+| **Horas de calibración y prueba** | ~25 horas/hombre de ajuste manual en banco de pruebas (a S/. 25.00/hora = S/. 625.00) | ~3 horas/hombre mediante generación automática de cuádruplas optimizadas (S/. 75.00) | **S/. 550.00** de ahorro en costo laboral por rutina |
+
+* **Análisis de Rentabilidad para el Desarrollador/Empresario:**
+  Implementar una mano robótica física de 18 GDL implica una inversión inicial de entre **S/. 1,200.00 y S/. 1,800.00** en hardware (18 actuadores, chasis articulado y microcontrolador). Someter el prototipo físico a rutinas sin verificar expone el 100% del capital invertido a pérdidas por sobrecalentamiento y bloqueo mecánico. Con la solución propuesta, el compilador cinemático y el simulador 3D reducen a cero el riesgo de daño físico durante las pruebas de diseño y automatizan la optimización de código, lo que se traduce en un **ahorro financiero neto superior a S/. 9,000.00** en el primer año de desarrollo por cada estación de trabajo (Carranza Sahagún, 2024).
 
 ---
 

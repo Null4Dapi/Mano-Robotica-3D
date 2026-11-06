@@ -155,17 +155,26 @@ bool Optimizer::exportTrajectoryJson(const std::vector<intermediate::Quadruple>&
     std::map<std::string, double> mem;
     std::vector<std::pair<int, std::map<std::string, double>>> frames = {{0, joints}};
     int t = 0;
+    bool hasPendingRotations = false;
     for (const auto& q : quads) {
         if (q.op == "=" || q.op == "ASIGNAR") {
             mem[q.result] = isNumber(q.arg1) ? std::stod(q.arg1) : (mem.contains(q.arg1) ? mem[q.arg1] : 0.0);
         } else if (q.op == "ROTAR") {
             std::string k = normalize(q.arg1);
             if (joints.contains(k)) joints[k] = isNumber(q.arg2) ? std::stod(q.arg2) : (mem.contains(q.arg2) ? mem[q.arg2] : 0.0);
-            t += 100; frames.push_back({t, joints});
+            hasPendingRotations = true;
         } else if (q.op == "ESPERAR") {
             int dur = isNumber(q.arg1) ? std::stoi(q.arg1) : (mem.contains(q.arg1) ? static_cast<int>(mem[q.arg1]) : 0);
-            if (dur > 0) { t += dur; frames.push_back({t, joints}); }
+            if (dur > 0) {
+                t += dur;
+                frames.push_back({t, joints});
+                hasPendingRotations = false;
+            }
         }
+    }
+    if (hasPendingRotations) {
+        t += 300;
+        frames.push_back({t, joints});
     }
 
     out << "{\n  \"programa\": \"ManoBionica_V1\",\n  \"total_gdl\": 18,\n  \"duracion_total_ms\": " << t << ",\n  \"frames\": [\n";

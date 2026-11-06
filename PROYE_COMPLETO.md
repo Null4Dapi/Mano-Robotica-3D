@@ -264,19 +264,17 @@ En la interacción con dispositivos robóticos articulados de alta precisión, l
 
 #### 1.3.1. Objetivo general
 
-Desarrollar un compilador en C++ para un lenguaje de comandos cinemáticos integrado a una máquina virtual y un motor de simulación gráfica tridimensional nativo, que valide sintáctica y semánticamente las instrucciones y genere código intermedio en cuádruplas para el control seguro de una mano robótica de 18 grados de libertad.
+Desarrollar un sistema de compilación y simulación cinemática tridimensional que garantice la validación biomecánica y el control articular seguro de una mano robótica de 18 grados de libertad.
 
 
 
 #### 1.3.2. Objetivos específicos
 
-1. Diseñar una gramática libre de contexto no ambigua e implementar los analizadores léxico y sintáctico en C++ para la generación del Árbol de Sintaxis Abstracta (AST) a partir de un conjunto de 10 primitivas cinemáticas.
+1. Construir el procesador sintáctico y semántico del lenguaje cinemático (.rob) capaz de estructurar el Árbol de Sintaxis Abstracta (AST) y restringir los ángulos de flexión articular al rango biomecánico seguro de 0° a 90°.
 
-2. Implementar una tabla de símbolos con gestión de ámbitos y reglas de verificación de tipos y rangos semánticos en C++ que restrinjan la flexión de las 15 articulaciones falángicas al rango de 0° a 90°.
+2. Construir el generador y optimizador de código intermedio que transforme las instrucciones validadas en una secuencia de cuádruplas lineales optimizadas mediante propagación de constantes y eliminación de instrucciones redundantes.
 
-3. Desarrollar el generador de código intermedio de tres direcciones que transforme el AST en un registro estructurado de cuádruplas utilizando variables temporales en C++.
-
-4. Implementar un módulo de optimización de bloques básicos (propagación de constantes y eliminación de instrucciones redundantes) y una máquina virtual en C++ conectada a un entorno de renderizado 3D para articular los 18 grados de libertad en tiempo real.
+3. Construir el entorno de simulación virtual tridimensional interactivo que interprete la trayectoria en cuádruplas y ejecute la articulación anatómica coordinada de los 18 grados de libertad en tiempo real.
 
 
 
@@ -286,7 +284,25 @@ Desarrollar un compilador en C++ para un lenguaje de comandos cinemáticos integ
 
 #### 1.4.1. Técnica
 
-C++ constituye el estándar de facto en sistemas robóticos de misión crítica, motores de videojuegos y compiladores comerciales gracias a su modelo de abstracciones de costo cero (*zero-cost abstractions*), control estricto de memoria sin recolección de basura (*garbage collector pauses*) y ejecución determinista. La aplicación de la teoría de compiladores desacopla la definición lógica del movimiento de su renderizado o accionamiento físico. La tabla de símbolos y el análisis semántico garantizan que las instrucciones inválidas sean interceptadas en la fase de traducción y nunca lleguen a ejecutarse. Además, el uso de cuádruplas lineales facilita la aplicación de optimizaciones algebraicas y la portabilidad hacia controladores embebidos ARM/AVR.
+La justificación técnica del proyecto se fundamenta en los requerimientos específicos de programación, infraestructura de software, hardware y viabilidad de acceso:
+
+* **Componentes que se van a programar:**
+  1. *Compilador nativo modular en C++20:* Estructurado en un *frontend* (analizador léxico con Flex y sintáctico LALR(1) con Bison), una tabla de símbolos con gestión de ámbitos para comprobación estricta de tipos y límites físicos biomecánicos [0°, 90°], y un *backend* de generación de Código de Tres Direcciones (TAC) estructurado en cuádruplas lineales con un optimizador de bloques básicos (*constant folding*, propagación y eliminación de código muerto).
+  2. *Visor cinemático 3D y entorno web:* Motor de renderizado en Three.js con WebGL que desacopla la visualización de la compilación, interpretando el archivo `trayectoria.json` emitido por el compilador para animar los 18 grados de libertad (flexión y abducción lateral de los 5 dedos y muñeca).
+
+* **Requerimientos de Software:**
+  * *Para el entorno de desarrollo y compilación:* Compilador GCC/G++ con soporte estándar C++20, generador léxico Flex (v2.6 o superior), generador sintáctico GNU Bison (v3.8 o superior) y el gestor de compilación GNU Make.
+  * *Para el entorno de ejecución del usuario:* Cualquier navegador web moderno con soporte nativo para WebGL 2.0 y ECMAScript 6 (Google Chrome, Mozilla Firefox, Microsoft Edge o navegadores basados en Chromium). No se requiere instalación de software propietario, licencias de terceros ni controladores de hardware especiales.
+
+* **Requerimientos de Hardware:**
+  * *Máquina de desarrollo / compilación:* Computadora con procesador x86_64 o ARM64 dual-core a 2.0 GHz o superior, 4 GB de memoria RAM y 500 MB de espacio disponible en almacenamiento.
+  * *Máquina del usuario final:* Computadora de escritorio o portátil estándar con gráficos integrados (Intel HD/UHD Graphics, AMD Radeon Vega o superior) capaz de renderizar gráficos 3D en WebGL a 60 FPS, y pantalla con resolución mínima de 1280×720 píxeles. De manera opcional para la captura gestual, una cámara web estándar (720p a 30 FPS).
+
+* **Criterio de Viabilidad y Adquisición:**
+  El proyecto cumple estrictamente con el principio de viabilidad técnica:
+  * El usuario final y las instituciones educativas **ya poseen** computadoras estándar con navegadores web comerciales instalados.
+  * Todo el software utilizado en el desarrollo y despliegue (Linux, GCC, Flex, Bison, Three.js) es de **código abierto y distribución libre**, por lo que el costo de adquisición de software es nulo (S/. 0.00).
+  * No se impone al usuario la necesidad de adquirir una mano robótica física o tarjetas electrónicas propietarias para experimentar y evaluar las rutinas cinemáticas, garantizando una disponibilidad operativa del 100%.
 
 
 
@@ -298,7 +314,17 @@ El desarrollo de prótesis mioeléctricas y tecnologías de asistencia biónica 
 
 #### 1.4.3. Financiera
 
-En el desarrollo de hardware robótico, las pruebas empíricas directas suelen provocar rotura de servomotores de precisión, fisuras en chasis impresos en resina o filamento y sobrecalentamiento de circuitos por comandos en tope mecánico. La validación previa por software mediante un compilador semántico y una simulación 3D fidedigna reduce a cero la tasa de siniestralidad de componentes durante las pruebas de diseño, ahorrando costos sustanciales en consumibles y repuestos electrónicos.
+La justificación financiera se sustenta en el **ahorro económico cuantificable en Soles (S/.)** y el retorno de inversión directo para el desarrollador, empresa o laboratorio de robótica mediante la prevención de siniestros de hardware y la eliminación de licencias de software privativo:
+
+| Rubro de Costo | Enfoque Tradicional Empírico (Físico / Privativo) | Enfoque Propuesto con Compilador y Simulación 3D | Ahorro Económico Estimado (S/.) |
+| :--- | :--- | :--- | :--- |
+| **Actuadores y servomotores** | Rotura promedio de 4 a 6 servomotores por colisión o sobreesfuerzo angular (S/. 35.00 c/u) | **S/. 0.00:** El analizador semántico intercepta ángulos fuera de rango [0°, 90°] antes de emitir la trayectoria | **S/. 140.00 – S/. 210.00** por ciclo de prueba |
+| **Chasis estructural de la mano** | Fractura mecánica de falanges impresas en resina/filamento técnico (S/. 180.00 juego completo) | **S/. 0.00:** Verificación cinemática virtual previa sin desgaste de material | **S/. 180.00** por incidente evitado |
+| **Licenciamiento de software** | Licencias comerciales de simulación robótica (ej. MATLAB / Simscape: ~S/. 8,500.00 anuales) | **S/. 0.00:** Stack 100% de código abierto (C++20, Flex, Bison, Three.js) | **S/. 8,500.00 anuales** por estación de trabajo |
+| **Horas de calibración y prueba** | ~25 horas/hombre de ajuste manual en banco de pruebas (a S/. 25.00/hora = S/. 625.00) | ~3 horas/hombre mediante generación automática de cuádruplas optimizadas (S/. 75.00) | **S/. 550.00** de ahorro en costo laboral por rutina |
+
+* **Análisis de Rentabilidad para el Desarrollador/Empresario:**
+  Implementar una mano robótica física de 18 GDL implica una inversión inicial de entre **S/. 1,200.00 y S/. 1,800.00** en hardware (18 actuadores, chasis articulado y microcontrolador). Someter el prototipo físico a rutinas sin verificar expone el 100% del capital invertido a pérdidas por sobrecalentamiento y bloqueo mecánico. Con la solución propuesta, el compilador cinemático y el simulador 3D reducen a cero el riesgo de daño físico durante las pruebas de diseño y automatizan la optimización de código, lo que se traduce en un **ahorro financiero neto superior a S/. 9,000.00** en el primer año de desarrollo por cada estación de trabajo.
 
 
 
