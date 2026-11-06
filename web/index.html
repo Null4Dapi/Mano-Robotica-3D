@@ -1441,31 +1441,61 @@
     }
 
     function createRobotMaterials() {
+      // 1. Primary Structural Shell: Matte Sandblasted Dark Titanium
       materials.armor = new THREE.MeshStandardMaterial({
-        color: 0x242730,
-        metalness: 0.85,
-        roughness: 0.25
+        color: 0x1f232b,
+        metalness: 0.82,
+        roughness: 0.32
       });
+
+      // 2. Skeletal Frame / Internal Core: Matte Carbon-Fiber Polymer
       materials.darkFrame = new THREE.MeshStandardMaterial({
-        color: 0x0f1115,
-        metalness: 0.65,
-        roughness: 0.45
+        color: 0x111317,
+        metalness: 0.40,
+        roughness: 0.58
       });
+
+      // 3. Precision Pivots, Axles & Hydraulic Rams: Mirror Hard Chrome Steel
       materials.jointChrome = new THREE.MeshStandardMaterial({
-        color: 0x8a909e,
-        metalness: 0.94,
-        roughness: 0.16
+        color: 0xdde3ec,
+        metalness: 0.96,
+        roughness: 0.14
       });
+
+      // 4. Low-Friction Bushings & Bearing Collars: Sintered Phosphor Bronze
+      materials.bronzeBushing = new THREE.MeshStandardMaterial({
+        color: 0xd4a359,
+        metalness: 0.88,
+        roughness: 0.28
+      });
+
+      // 5. Tactile Compliance Pads & Friction Tread: Vulcanized Nitrile Elastomer
+      materials.sensorPad = new THREE.MeshStandardMaterial({
+        color: 0x0c0e12,
+        metalness: 0.08,
+        roughness: 0.92
+      });
+
+      // 6. Subdued Telemetry Optics & Optical Encoders: Ice Cyan Luminescent
       materials.ledGlow = new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        emissive: 0x334155,
-        emissiveIntensity: 0.6,
+        color: 0x38bdf8,
+        emissive: 0x0284c7,
+        emissiveIntensity: 0.85,
         roughness: 0.2
       });
-      materials.sensorPad = new THREE.MeshStandardMaterial({
-        color: 0x181a20,
-        metalness: 0.25,
-        roughness: 0.7
+
+      // 7. Synthetic Tendons / Micro-Cables: Braided Tungsten-Dyneema
+      materials.tendonWire = new THREE.MeshStandardMaterial({
+        color: 0x71717a,
+        metalness: 0.85,
+        roughness: 0.35
+      });
+
+      // 8. Hardware Fasteners & Retaining Caps: Blued Alloy Steel
+      materials.fastenerAlloy = new THREE.MeshStandardMaterial({
+        color: 0x27272a,
+        metalness: 0.92,
+        roughness: 0.3
       });
     }
 
@@ -1473,129 +1503,258 @@
       handRoot = new THREE.Group();
       scene.add(handRoot);
 
-      // 1. Forearm Pedestal Base
+      // =========================================================================
+      // 1. FOREARM PYLON & DUAL LINEAR ACTUATION RIG
+      // =========================================================================
       const forearmGroup = new THREE.Group();
-      forearmGroup.position.set(0, -1.9, 0);
+      forearmGroup.position.set(0, -1.95, 0);
       handRoot.add(forearmGroup);
 
-      const forearmCore = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.95, 1.18, 2.5, 24),
-        materials.darkFrame
-      );
-      forearmCore.castShadow = true;
-      forearmCore.receiveShadow = true;
-      forearmGroup.add(forearmCore);
+      // Main structural pylon: octagonal tapered prism with hollowed inner channel
+      const pylonGeo = new THREE.CylinderGeometry(0.88, 1.15, 2.4, 8, 1);
+      const forearmPylon = new THREE.Mesh(pylonGeo, materials.darkFrame);
+      forearmPylon.castShadow = true;
+      forearmPylon.receiveShadow = true;
+      forearmGroup.add(forearmPylon);
 
-      const cuffArmor = new THREE.Mesh(
-        new THREE.CylinderGeometry(1.06, 1.24, 1.6, 8),
-        materials.armor
-      );
-      cuffArmor.position.y = -0.15;
-      cuffArmor.castShadow = true;
-      forearmGroup.add(cuffArmor);
+      // Carbon-fiber exoskeleton truss plates (left & right flank braces)
+      [-0.82, 0.82].forEach(xSign => {
+        const braceGeo = new THREE.BoxGeometry(0.12, 2.1, 0.72);
+        const brace = new THREE.Mesh(braceGeo, materials.armor);
+        brace.position.set(xSign, -0.05, 0);
+        brace.castShadow = true;
+        forearmGroup.add(brace);
 
-      const collarLed = new THREE.Mesh(
-        new THREE.TorusGeometry(1.02, 0.045, 12, 36),
-        materials.ledGlow
-      );
-      collarLed.rotation.x = Math.PI / 2;
-      collarLed.position.y = 0.85;
-      forearmGroup.add(collarLed);
-
-      [-0.75, 0.75].forEach(xOffset => {
-        const pistonCyl = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.12, 0.14, 2.2, 12),
-          materials.jointChrome
-        );
-        pistonCyl.position.set(xOffset, 0.2, 0.6);
-        forearmGroup.add(pistonCyl);
+        // Allen head mounting bolts on the flank braces
+        [-0.7, 0, 0.7].forEach(yOffset => {
+          const boltGeo = new THREE.CylinderGeometry(0.06, 0.06, 0.16, 6);
+          const bolt = new THREE.Mesh(boltGeo, materials.fastenerAlloy);
+          bolt.rotation.z = Math.PI / 2;
+          bolt.position.set(xSign * 1.05, yOffset, 0);
+          forearmGroup.add(bolt);
+        });
       });
 
-      // 2. Wrist Gimbal Joint (3-Axis)
+      // Dual hydraulic/electromechanical pushrod actuators (connecting to wrist)
+      [-0.55, 0.55].forEach(xPos => {
+        // Outer cylinder barrel
+        const barrelGeo = new THREE.CylinderGeometry(0.16, 0.18, 1.6, 16);
+        const barrel = new THREE.Mesh(barrelGeo, materials.armor);
+        barrel.position.set(xPos, 0.1, 0.52);
+        barrel.castShadow = true;
+        forearmGroup.add(barrel);
+
+        // Bronze sealing gland collar
+        const collarGeo = new THREE.CylinderGeometry(0.19, 0.19, 0.1, 16);
+        const collar = new THREE.Mesh(collarGeo, materials.bronzeBushing);
+        collar.position.set(xPos, 0.85, 0.52);
+        forearmGroup.add(collar);
+
+        // Inner polished chrome ram extending upward toward wrist gimbal
+        const ramGeo = new THREE.CylinderGeometry(0.09, 0.09, 1.1, 16);
+        const ram = new THREE.Mesh(ramGeo, materials.jointChrome);
+        ram.position.set(xPos, 1.15, 0.52);
+        ram.castShadow = true;
+        forearmGroup.add(ram);
+
+        // Spherical rod-end bearing (clevis)
+        const rodEndGeo = new THREE.SphereGeometry(0.12, 12, 12);
+        const rodEnd = new THREE.Mesh(rodEndGeo, materials.jointChrome);
+        rodEnd.position.set(xPos, 1.68, 0.52);
+        forearmGroup.add(rodEnd);
+      });
+
+      // Braided cable conduit sleeve along dorsal center
+      const conduitGeo = new THREE.CylinderGeometry(0.18, 0.22, 2.2, 16);
+      const conduit = new THREE.Mesh(conduitGeo, materials.sensorPad);
+      conduit.position.set(0, 0.1, -0.48);
+      forearmGroup.add(conduit);
+
+      // Wrist Mounting Ring & Optical Encoder Flange
+      const mountFlangeGeo = new THREE.CylinderGeometry(1.02, 0.94, 0.24, 24);
+      const mountFlange = new THREE.Mesh(mountFlangeGeo, materials.armor);
+      mountFlange.position.y = 1.08;
+      mountFlange.castShadow = true;
+      forearmGroup.add(mountFlange);
+
+      // Segmented status optical ring (4 discrete quadrant indicators)
+      for (let i = 0; i < 4; i++) {
+        const segGeo = new THREE.TorusGeometry(0.96, 0.032, 8, 16, Math.PI * 0.38);
+        const seg = new THREE.Mesh(segGeo, materials.ledGlow);
+        seg.rotation.x = Math.PI / 2;
+        seg.rotation.z = (Math.PI / 2) * i + Math.PI * 0.06;
+        seg.position.y = 1.18;
+        forearmGroup.add(seg);
+      }
+
+      // =========================================================================
+      // 2. INDUSTRIAL BIAXIAL GIMBAL WRIST (CARDAN YOKE)
+      // =========================================================================
       wristGimbal = new THREE.Group();
-      wristGimbal.position.set(0, -0.45, 0);
+      wristGimbal.position.set(0, -0.42, 0);
       handRoot.add(wristGimbal);
 
-      const wristCoreSphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.68, 24, 24),
-        materials.jointChrome
-      );
-      wristGimbal.add(wristCoreSphere);
+      // Outer Cardan U-Yoke (machined titanium fork)
+      const yokeBaseGeo = new THREE.CylinderGeometry(0.58, 0.62, 0.32, 18);
+      const yokeBase = new THREE.Mesh(yokeBaseGeo, materials.armor);
+      yokeBase.position.y = -0.16;
+      wristGimbal.add(yokeBase);
 
-      const wristAxle = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.28, 0.28, 1.75, 16),
-        materials.darkFrame
-      );
-      wristAxle.rotation.z = Math.PI / 2;
-      wristGimbal.add(wristAxle);
+      // Twin upright yoke arms
+      [-0.72, 0.72].forEach(xSign => {
+        const armGeo = new THREE.BoxGeometry(0.24, 0.65, 0.52);
+        const arm = new THREE.Mesh(armGeo, materials.armor);
+        arm.position.set(xSign, 0.22, 0);
+        arm.castShadow = true;
+        wristGimbal.add(arm);
 
-      [-0.86, 0.86].forEach(xPos => {
-        const cap = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.32, 0.32, 0.08, 16),
-          materials.ledGlow
-        );
+        // Precision bronze bushing sleeve on each arm
+        const bushingGeo = new THREE.CylinderGeometry(0.26, 0.26, 0.26, 16);
+        const bushing = new THREE.Mesh(bushingGeo, materials.bronzeBushing);
+        bushing.rotation.z = Math.PI / 2;
+        bushing.position.set(xSign, 0.35, 0);
+        wristGimbal.add(bushing);
+
+        // Allen cap screw retainer
+        const capGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.32, 6);
+        const cap = new THREE.Mesh(capGeo, materials.fastenerAlloy);
         cap.rotation.z = Math.PI / 2;
-        cap.position.x = xPos;
+        cap.position.set(xSign * 1.08, 0.35, 0);
         wristGimbal.add(cap);
       });
 
-      // 3. Palm Chassis Group
+      // Central Cardan Cross-Journal Pin (hard chrome steel)
+      const crossPinGeo = new THREE.CylinderGeometry(0.22, 0.22, 1.48, 18);
+      const crossPin = new THREE.Mesh(crossPinGeo, materials.jointChrome);
+      crossPin.rotation.z = Math.PI / 2;
+      crossPin.position.y = 0.35;
+      crossPin.castShadow = true;
+      wristGimbal.add(crossPin);
+
+      // Spherical central core enclosing the cardan intersection
+      const gimbalCore = new THREE.Mesh(
+        new THREE.SphereGeometry(0.48, 20, 20),
+        materials.darkFrame
+      );
+      gimbalCore.position.y = 0.35;
+      wristGimbal.add(gimbalCore);
+
+      // =========================================================================
+      // 3. ANATOMICAL METACARPAL PALM CHASSIS
+      // =========================================================================
       palmGroup = new THREE.Group();
       palmGroup.position.set(0, 0.35, 0);
       wristGimbal.add(palmGroup);
 
-      const palmCenterGeo = new THREE.BoxGeometry(2.15, 2.05, 0.62);
-      const palmCenterMesh = new THREE.Mesh(palmCenterGeo, materials.armor);
-      palmCenterMesh.position.set(-0.12, 1.05, 0);
-      palmCenterMesh.castShadow = true;
-      palmCenterMesh.receiveShadow = true;
-      palmGroup.add(palmCenterMesh);
+      // Sculpted Carpal-Metacarpal Chassis: Tapered anatomical bridge
+      const palmCoreGeo = new THREE.BoxGeometry(2.18, 1.95, 0.58);
+      const palmCore = new THREE.Mesh(palmCoreGeo, materials.darkFrame);
+      palmCore.position.set(-0.06, 1.02, 0);
+      palmCore.castShadow = true;
+      palmCore.receiveShadow = true;
+      palmGroup.add(palmCore);
 
-      const palmInnerCore = new THREE.Mesh(
-        new THREE.BoxGeometry(1.9, 1.75, 0.68),
-        materials.darkFrame
+      // Dorsal Exoskeleton Carapace: Sculpted titanium shell with distinct metacarpal channels
+      const dorsalShellGeo = new THREE.BoxGeometry(2.12, 1.88, 0.18);
+      const dorsalShell = new THREE.Mesh(dorsalShellGeo, materials.armor);
+      dorsalShell.position.set(-0.06, 1.04, -0.28);
+      dorsalShell.castShadow = true;
+      palmGroup.add(dorsalShell);
+
+      // 4 Metacarpal Structural Spine Ridges (Rayos metacarpianos II al V)
+      [-0.82, -0.25, 0.35, 0.92].forEach((xPos, idx) => {
+        const ridgeH = 1.65 - Math.abs(xPos) * 0.15;
+        const ridgeGeo = new THREE.CylinderGeometry(0.08, 0.11, ridgeH, 8);
+        const ridge = new THREE.Mesh(ridgeGeo, materials.jointChrome);
+        ridge.position.set(xPos, 1.0 + (idx === 1 ? 0.08 : 0), -0.36);
+        ridge.castShadow = true;
+        palmGroup.add(ridge);
+      });
+
+      // Recessed Central Telemetry Matrix (Status window on the dorsal plate)
+      const telemetryPlaque = new THREE.Mesh(
+        new THREE.BoxGeometry(0.85, 0.65, 0.04),
+        materials.fastenerAlloy
       );
-      palmInnerCore.position.set(-0.1, 1.05, 0.02);
-      palmGroup.add(palmInnerCore);
+      telemetryPlaque.position.set(-0.06, 0.95, -0.38);
+      palmGroup.add(telemetryPlaque);
 
-      const coreRing = new THREE.Mesh(
-        new THREE.TorusGeometry(0.42, 0.045, 16, 32),
+      const statusGlowStrip = new THREE.Mesh(
+        new THREE.BoxGeometry(0.72, 0.06, 0.05),
         materials.ledGlow
       );
-      coreRing.position.set(-0.08, 1.05, 0.36);
-      palmGroup.add(coreRing);
+      statusGlowStrip.position.set(-0.06, 1.15, -0.39);
+      palmGroup.add(statusGlowStrip);
 
-      const coreRingBack = coreRing.clone();
-      coreRingBack.position.z = -0.36;
-      palmGroup.add(coreRingBack);
+      // PALMAR (VOLAR) FACE: Ergonomic High-Friction Elastomer Grip Architecture
+      // 1) Distal transverse metacarpal ridge pad (treaded strip under knuckles)
+      const palmarTreadGeo = new THREE.BoxGeometry(1.85, 0.45, 0.14);
+      const palmarTread = new THREE.Mesh(palmarTreadGeo, materials.sensorPad);
+      palmarTread.position.set(-0.05, 1.72, 0.34);
+      palmGroup.add(palmarTread);
 
-      // Sleek Thenar Socket (Smooth palm contour transition)
-      const thenarSocket = new THREE.Mesh(
-        new THREE.SphereGeometry(0.38, 18, 18),
-        materials.darkFrame
+      // Micro-ribs for palmar grip
+      [-0.12, 0, 0.12].forEach(yOff => {
+        const ribGeo = new THREE.BoxGeometry(1.75, 0.04, 0.04);
+        const rib = new THREE.Mesh(ribGeo, materials.armor);
+        rib.position.set(-0.05, 1.72 + yOff, 0.41);
+        palmGroup.add(rib);
+      });
+
+      // 2) Thenar Eminence Cushion (almohadilla tenar en la base medial)
+      const thenarCushionGeo = new THREE.SphereGeometry(0.42, 16, 16);
+      const thenarCushion = new THREE.Mesh(thenarCushionGeo, materials.sensorPad);
+      thenarCushion.scale.set(0.85, 1.25, 0.55);
+      thenarCushion.position.set(-0.62, 0.65, 0.32);
+      palmGroup.add(thenarCushion);
+
+      // 3) Thenar Mechanical Saddle Bracket (Base articular CMC de aleación de titanio)
+      const thenarBracketGeo = new THREE.BoxGeometry(0.55, 0.65, 0.52);
+      const thenarBracket = new THREE.Mesh(thenarBracketGeo, materials.armor);
+      thenarBracket.position.set(-0.82, 0.45, 0.15);
+      thenarBracket.rotation.y = 0.28;
+      thenarBracket.castShadow = true;
+      palmGroup.add(thenarBracket);
+
+      // Bronze socket ring for thumb ball swivel
+      const thenarSocketRing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.24, 0.05, 8, 20),
+        materials.bronzeBushing
       );
-      thenarSocket.position.set(-0.78, 0.35, 0.18);
-      palmGroup.add(thenarSocket);
+      thenarSocketRing.position.set(-0.85, 0.40, 0.24);
+      thenarSocketRing.rotation.x = Math.PI / 4;
+      palmGroup.add(thenarSocketRing);
 
+      // =========================================================================
+      // HYPOTHENAR CUPPING ARCH (ULNAR 4th & 5th METACARPAL RIG)
+      // =========================================================================
       rightPalmArchGroup = new THREE.Group();
-      rightPalmArchGroup.position.set(0.35, 0.0, 0.0);
+      rightPalmArchGroup.position.set(0.38, 0.0, 0.0);
       palmGroup.add(rightPalmArchGroup);
 
-      const ulnarPalmPlate = new THREE.Mesh(
-        new THREE.BoxGeometry(0.95, 1.9, 0.58),
-        materials.armor
-      );
-      ulnarPalmPlate.position.set(0.45, 1.0, 0.04);
-      ulnarPalmPlate.castShadow = true;
-      rightPalmArchGroup.add(ulnarPalmPlate);
+      // Ulnar palmar plate (enables hand cupping around cups/spheres)
+      const ulnarPlateGeo = new THREE.BoxGeometry(0.88, 1.88, 0.54);
+      const ulnarPlate = new THREE.Mesh(ulnarPlateGeo, materials.armor);
+      ulnarPlate.position.set(0.48, 1.02, 0.02);
+      ulnarPlate.castShadow = true;
+      rightPalmArchGroup.add(ulnarPlate);
 
-      // 4. Build All 5 Articulated Fingers (15 GDL)
+      // Hypothenar elastomer pad (almohadilla hipotenar ulnar)
+      const hypothenarCushionGeo = new THREE.BoxGeometry(0.68, 1.15, 0.12);
+      const hypothenarCushion = new THREE.Mesh(hypothenarCushionGeo, materials.sensorPad);
+      hypothenarCushion.position.set(0.52, 0.85, 0.32);
+      rightPalmArchGroup.add(hypothenarCushion);
+
+      // =========================================================================
+      // 4. ASSEMBLE ALL 5 ARTICULATED FINGERS (18 GDL TOTAL)
+      // =========================================================================
       FINGER_CONFIGS.forEach(cfg => {
         const fingerRig = createArticulatedFinger(cfg);
         fingerRigNodes[cfg.id] = fingerRig;
 
         if (cfg.id === 'ring' || cfg.id === 'pinky') {
-          fingerRig.root.position.x -= 0.35;
+          // Compensate for ulnar arch pivot offset
+          fingerRig.root.position.x -= 0.38;
           rightPalmArchGroup.add(fingerRig.root);
         } else {
           palmGroup.add(fingerRig.root);
@@ -1608,132 +1767,205 @@
       root.position.set(cfg.basePos.x, cfg.basePos.y, cfg.basePos.z);
       root.rotation.set(cfg.baseRot.x, cfg.baseRot.y, cfg.baseRot.z);
 
+      // Lateral splay (abduction / adduction) group
       const splayGroup = new THREE.Group();
       root.add(splayGroup);
 
+      // Metacarpophalangeal Joint (MCP)
       const mcpJoint = new THREE.Group();
       splayGroup.add(mcpJoint);
-      addKnuckleServoMesh(mcpJoint, cfg.radii[0] * 1.08, true, cfg.isThumb);
+      addKnuckleServoMesh(mcpJoint, cfg.radii[0] * 1.06, true, cfg.isThumb);
 
+      // Proximal Phalanx
       const len1 = cfg.lengths[0];
       const r1 = cfg.radii[0];
-      addPhalanxSegmentMesh(mcpJoint, len1, r1, r1 * 0.9, cfg.isThumb);
+      addPhalanxSegmentMesh(mcpJoint, len1, r1, r1 * 0.92, 0, cfg.isThumb);
 
+      // Proximal Interphalangeal Joint (PIP)
       const pipJoint = new THREE.Group();
       pipJoint.position.set(0, len1, 0);
       mcpJoint.add(pipJoint);
       addKnuckleServoMesh(pipJoint, cfg.radii[1] * 1.02, false, cfg.isThumb);
 
+      // Intermediate Phalanx
       const len2 = cfg.lengths[1];
       const r2 = cfg.radii[1];
-      addPhalanxSegmentMesh(pipJoint, len2, r2, r2 * 0.88, cfg.isThumb);
+      addPhalanxSegmentMesh(pipJoint, len2, r2, r2 * 0.88, 1, cfg.isThumb);
 
+      // Distal Interphalangeal Joint (DIP)
       const dipJoint = new THREE.Group();
       dipJoint.position.set(0, len2, 0);
       pipJoint.add(dipJoint);
-      addKnuckleServoMesh(dipJoint, cfg.radii[2] * 0.98, false, cfg.isThumb);
+      addKnuckleServoMesh(dipJoint, cfg.radii[2] * 0.96, false, cfg.isThumb);
 
+      // Distal Phalanx & Bio-Inspired Fingertip Pulp
       const len3 = cfg.lengths[2];
       const r3 = cfg.radii[2];
-      addPhalanxSegmentMesh(dipJoint, len3 * 0.78, r3, r3 * 0.82, cfg.isThumb);
+      addPhalanxSegmentMesh(dipJoint, len3 * 0.76, r3, r3 * 0.82, 2, cfg.isThumb);
 
-      const tipDome = new THREE.Mesh(
-        new THREE.SphereGeometry(r3 * 0.84, 18, 18),
-        materials.armor
-      );
-      tipDome.position.set(0, len3 * 0.78, 0);
-      tipDome.scale.set(0.95, 1.25, 0.92);
-      dipJoint.add(tipDome);
+      // Anatomical High-Friction Tactile Fingertip (Pulpejo Ergonómico)
+      const pulpGeo = new THREE.SphereGeometry(r3 * 0.88, 18, 18);
+      const pulpMesh = new THREE.Mesh(pulpGeo, materials.sensorPad);
+      pulpMesh.scale.set(0.96, 1.35, 1.08);
+      pulpMesh.position.set(0, len3 * 0.78, cfg.isThumb ? r3 * 0.22 : r3 * 0.18);
+      pulpMesh.castShadow = true;
+      dipJoint.add(pulpMesh);
 
-      const tipLedStrip = new THREE.Mesh(
-        new THREE.TorusGeometry(r3 * 0.65, 0.025, 8, 20),
-        materials.ledGlow
-      );
-      tipLedStrip.rotation.x = Math.PI / 2;
-      tipLedStrip.position.set(0, len3 * 0.72, 0);
-      dipJoint.add(tipLedStrip);
+      // Protective Dorsal Nail Shell
+      const nailGeo = new THREE.CylinderGeometry(r3 * 0.75, r3 * 0.82, len3 * 0.42, 14, 1, false, Math.PI, Math.PI);
+      const nailMesh = new THREE.Mesh(nailGeo, materials.armor);
+      nailMesh.position.set(0, len3 * 0.76, -r3 * 0.12);
+      nailMesh.castShadow = true;
+      dipJoint.add(nailMesh);
+
+      // Optical Proximity / Contact Force Sensor Aperture at tip
+      const tipSensorGeo = new THREE.CylinderGeometry(r3 * 0.32, r3 * 0.32, 0.05, 16);
+      const tipSensor = new THREE.Mesh(tipSensorGeo, materials.ledGlow);
+      tipSensor.position.set(0, len3 * 0.98, 0);
+      dipJoint.add(tipSensor);
 
       return { root, splayGroup, mcpJoint, pipJoint, dipJoint };
     }
 
     function addKnuckleServoMesh(jointGroup, radius, hasLedRing, isThumb = false) {
       if (isThumb) {
-        // Anatomical flush spherical pivot for the thumb (no bulky transverse pins)
-        const ballJoint = new THREE.Mesh(
-          new THREE.SphereGeometry(radius * 1.04, 18, 18),
+        // True spherical low-profile ball-clevis for thumb CMC/MCP opposition
+        const ballCore = new THREE.Mesh(
+          new THREE.SphereGeometry(radius * 1.05, 20, 20),
           materials.jointChrome
         );
-        ballJoint.castShadow = true;
-        jointGroup.add(ballJoint);
+        ballCore.castShadow = true;
+        jointGroup.add(ballCore);
 
-        const coreBevel = new THREE.Mesh(
-          new THREE.CylinderGeometry(radius * 0.88, radius * 0.88, radius * 1.15, 16),
-          materials.darkFrame
+        // Surrounding bronze retention collar
+        const collarRing = new THREE.Mesh(
+          new THREE.TorusGeometry(radius * 0.98, 0.055, 10, 24),
+          materials.bronzeBushing
         );
-        coreBevel.rotation.z = Math.PI / 2;
-        jointGroup.add(coreBevel);
+        collarRing.rotation.x = Math.PI / 2;
+        jointGroup.add(collarRing);
 
         if (hasLedRing) {
-          const ledRing = new THREE.Mesh(
-            new THREE.TorusGeometry(radius * 0.98, 0.025, 8, 24),
+          const telemetryRing = new THREE.Mesh(
+            new THREE.TorusGeometry(radius * 0.88, 0.024, 8, 20),
             materials.ledGlow
           );
-          jointGroup.add(ledRing);
+          jointGroup.add(telemetryRing);
         }
         return;
       }
 
-      // Industrial knuckle servo for fingers (compacted overhang)
-      const servoPin = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius, radius, radius * 1.82, 18),
-        materials.jointChrome
-      );
-      servoPin.rotation.z = Math.PI / 2;
-      servoPin.castShadow = true;
-      jointGroup.add(servoPin);
+      // High-precision bifurcated knuckle hinge for fingers
+      // 1. Central Hard Chrome Bearing Axle Pin
+      const axleLength = radius * 1.88;
+      const axleGeo = new THREE.CylinderGeometry(radius * 0.58, radius * 0.58, axleLength, 18);
+      const axlePin = new THREE.Mesh(axleGeo, materials.jointChrome);
+      axlePin.rotation.z = Math.PI / 2;
+      axlePin.castShadow = true;
+      jointGroup.add(axlePin);
 
-      const sideBolts = new THREE.Mesh(
-        new THREE.CylinderGeometry(radius * 0.55, radius * 0.55, radius * 1.95, 12),
-        materials.darkFrame
-      );
-      sideBolts.rotation.z = Math.PI / 2;
-      jointGroup.add(sideBolts);
+      // 2. Dual Sintered Phosphor Bronze Bushing Rings (flank washers)
+      [-axleLength * 0.42, axleLength * 0.42].forEach(xSign => {
+        const bushingGeo = new THREE.CylinderGeometry(radius * 0.84, radius * 0.84, radius * 0.18, 16);
+        const bushing = new THREE.Mesh(bushingGeo, materials.bronzeBushing);
+        bushing.rotation.z = Math.PI / 2;
+        bushing.position.x = xSign;
+        jointGroup.add(bushing);
 
+        // Allen cap screw hardware detail on outer ends
+        const boltGeo = new THREE.CylinderGeometry(radius * 0.42, radius * 0.42, radius * 0.12, 6);
+        const bolt = new THREE.Mesh(boltGeo, materials.fastenerAlloy);
+        bolt.rotation.z = Math.PI / 2;
+        bolt.position.x = xSign * 1.15;
+        jointGroup.add(bolt);
+      });
+
+      // 3. Central Pivot Drum / Hinge Barrel
+      const drumGeo = new THREE.CylinderGeometry(radius * 0.92, radius * 0.92, radius * 0.72, 18);
+      const drum = new THREE.Mesh(drumGeo, materials.armor);
+      drum.rotation.z = Math.PI / 2;
+      drum.castShadow = true;
+      jointGroup.add(drum);
+
+      // 4. Integrated Mechanical Extension-Stop Cowl (anti-hyperextension barrier)
+      const stopCowlGeo = new THREE.BoxGeometry(radius * 1.25, radius * 0.35, radius * 0.82);
+      const stopCowl = new THREE.Mesh(stopCowlGeo, materials.darkFrame);
+      stopCowl.position.set(0, -radius * 0.42, -radius * 0.52);
+      jointGroup.add(stopCowl);
+
+      // 5. Optical joint encoder ring on MCP knuckles
       if (hasLedRing) {
-        const ledRing = new THREE.Mesh(
-          new THREE.CylinderGeometry(radius * 1.03, radius * 1.03, 0.06, 16),
-          materials.ledGlow
-        );
-        ledRing.rotation.z = Math.PI / 2;
-        jointGroup.add(ledRing);
+        const ringGeo = new THREE.CylinderGeometry(radius * 0.96, radius * 0.96, 0.05, 18);
+        const ring = new THREE.Mesh(ringGeo, materials.ledGlow);
+        ring.rotation.z = Math.PI / 2;
+        jointGroup.add(ring);
       }
     }
 
-    function addPhalanxSegmentMesh(parentJoint, length, bottomRadius, topRadius, isThumb = false) {
-      const innerCore = new THREE.Mesh(
-        new THREE.CylinderGeometry(topRadius * 0.75, bottomRadius * 0.75, length, 14),
-        materials.darkFrame
-      );
-      innerCore.position.set(0, length / 2, 0);
+    function addPhalanxSegmentMesh(parentJoint, length, bottomRadius, topRadius, phalanxIndex = 0, isThumb = false) {
+      const midY = length / 2;
+
+      // 1. Central Structural Core: Lightweight carbon-fiber structural shaft
+      const coreGeo = new THREE.CylinderGeometry(topRadius * 0.70, bottomRadius * 0.74, length * 0.92, 14);
+      const innerCore = new THREE.Mesh(coreGeo, materials.darkFrame);
+      innerCore.position.set(0, midY, 0);
+      innerCore.castShadow = true;
       parentJoint.add(innerCore);
 
-      const armorW = isThumb ? bottomRadius * 1.45 : bottomRadius * 1.62;
-      const armorD = isThumb ? bottomRadius * 1.35 : bottomRadius * 1.42;
-      const armorShell = new THREE.Mesh(
-        new THREE.BoxGeometry(armorW, length * 0.76, armorD),
-        materials.armor
-      );
-      armorShell.position.set(0, length / 2, -bottomRadius * 0.08);
-      armorShell.castShadow = true;
-      armorShell.receiveShadow = true;
-      parentJoint.add(armorShell);
+      // 2. Dual Titanium Side Flank Plates (Skeletonized Truss Exoskeleton)
+      const flankW = bottomRadius * 0.14;
+      const flankH = length * 0.88;
+      const flankD = (bottomRadius + topRadius) * 0.82;
+      [-bottomRadius * 0.68, bottomRadius * 0.68].forEach(xSign => {
+        const flankGeo = new THREE.BoxGeometry(flankW, flankH, flankD);
+        const flank = new THREE.Mesh(flankGeo, materials.armor);
+        flank.position.set(xSign, midY, -bottomRadius * 0.04);
+        flank.castShadow = true;
+        flank.receiveShadow = true;
+        parentJoint.add(flank);
 
-      const gripPad = new THREE.Mesh(
-        new THREE.BoxGeometry(bottomRadius * 1.25, length * 0.65, bottomRadius * 0.45),
-        materials.sensorPad
-      );
-      gripPad.position.set(0, length / 2, bottomRadius * 0.52);
+        // CNC lightening cutouts on side plates
+        const cutoutGeo = new THREE.BoxGeometry(flankW * 1.2, length * 0.38, flankD * 0.42);
+        const cutout = new THREE.Mesh(cutoutGeo, materials.darkFrame);
+        cutout.position.set(xSign, midY, -bottomRadius * 0.04);
+        parentJoint.add(cutout);
+      });
+
+      // 3. Dorsal Protective Carapace / Aerodynamic Shield
+      const carapaceW = (bottomRadius + topRadius) * 1.15;
+      const carapaceGeo = new THREE.BoxGeometry(carapaceW, length * 0.82, bottomRadius * 0.22);
+      const carapace = new THREE.Mesh(carapaceGeo, materials.armor);
+      carapace.position.set(0, midY, -bottomRadius * 0.46);
+      carapace.castShadow = true;
+      parentJoint.add(carapace);
+
+      // 4. Volar (Palmar) Tactile Grip Pad with Segmented Friction Tread
+      const padW = (bottomRadius + topRadius) * 0.95;
+      const padL = length * 0.75;
+      const padD = bottomRadius * 0.42;
+      const padGeo = new THREE.BoxGeometry(padW, padL, padD);
+      const gripPad = new THREE.Mesh(padGeo, materials.sensorPad);
+      gripPad.position.set(0, midY, bottomRadius * 0.44);
+      gripPad.castShadow = true;
       parentJoint.add(gripPad);
+
+      // Segmented micro-ribs along the volar pad
+      const numRibs = phalanxIndex === 0 ? 3 : 2;
+      for (let r = 0; r < numRibs; r++) {
+        const ribY = midY - padL * 0.32 + (padL * 0.64 / (numRibs - 1 || 1)) * r;
+        const ribGeo = new THREE.BoxGeometry(padW * 0.88, 0.035, 0.05);
+        const ribMesh = new THREE.Mesh(ribGeo, materials.armor);
+        ribMesh.position.set(0, ribY, bottomRadius * 0.66);
+        parentJoint.add(ribMesh);
+      }
+
+      // 5. Dual Tendon Micro-Cables (Dyneema routing along the palmar flanks)
+      [-bottomRadius * 0.48, bottomRadius * 0.48].forEach(xPos => {
+        const tendonGeo = new THREE.CylinderGeometry(0.016, 0.016, length * 0.95, 6);
+        const tendon = new THREE.Mesh(tendonGeo, materials.tendonWire);
+        tendon.position.set(xPos, midY, bottomRadius * 0.36);
+        parentJoint.add(tendon);
+      });
     }
 
     /***********************************************************************
@@ -1857,9 +2089,9 @@
       document.querySelectorAll('.viewport-top-right .view-control-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
       handState.wireframe = (mode === 'wire');
-      materials.armor.wireframe = handState.wireframe;
-      materials.darkFrame.wireframe = handState.wireframe;
-      materials.jointChrome.wireframe = handState.wireframe;
+      Object.values(materials).forEach(mat => {
+        if (mat && 'wireframe' in mat) mat.wireframe = handState.wireframe;
+      });
     }
 
     function toggleWireframe() {
