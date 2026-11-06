@@ -1,4 +1,5 @@
 #include "modules/ll1_analyzer/LL1Table.hpp"
+#include "core/TUI.hpp"
 #include <algorithm>
 #include <cctype>
 
@@ -199,9 +200,14 @@ ParseResult LL1Table::simulate(const std::vector<std::string>& input_tokens) con
 }
 
 void LL1Table::printFirstFollow(std::ostream& os) const {
-    os << "\n+-------------------+------------------------------------+--------------------------------+\n";
-    os << "| No Terminal       | PRIMERO                            | SIGUIENTE                      |\n";
-    os << "+-------------------+------------------------------------+--------------------------------+\n";
+    using namespace cyberhand::ui;
+    os << "\n" << GRAY << TOP_L << hRule(19) << T_DOWN << hRule(36) << T_DOWN << hRule(32) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " No Terminal       " << RESET
+       << GRAY << V_LINE << BOLD << CYAN << " PRIMERO                            " << RESET
+       << GRAY << V_LINE << BOLD << GREEN << " SIGUIENTE                      " << RESET
+       << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(19) << CROSS << hRule(36) << CROSS << hRule(32) << T_LEFT << RESET << "\n";
+
     for (const auto& nt : grammar_.non_terminals) {
         std::string first_s = "{ ", follow_s = "{ ";
         if (first_sets_.contains(nt)) {
@@ -215,35 +221,44 @@ void LL1Table::printFirstFollow(std::ostream& os) const {
         }
         follow_s += " }";
 
-        os << "| " << nt << (nt.size() < 18 ? std::string(18 - nt.size(), ' ') : "")
-           << "| " << first_s << (first_s.size() < 35 ? std::string(35 - first_s.size(), ' ') : "")
-           << "| " << follow_s << (follow_s.size() < 31 ? std::string(31 - follow_s.size(), ' ') : "")
-           << "|\n";
+        os << GRAY << V_LINE << WHITE << " " << nt << (nt.size() < 18 ? std::string(18 - nt.size(), ' ') : "")
+           << GRAY << V_LINE << CYAN << " " << first_s << (first_s.size() < 35 ? std::string(35 - first_s.size(), ' ') : "")
+           << GRAY << V_LINE << GREEN << " " << follow_s << (follow_s.size() < 31 ? std::string(31 - follow_s.size(), ' ') : "")
+           << GRAY << V_LINE << RESET << "\n";
     }
-    os << "+-------------------+------------------------------------+--------------------------------+\n";
+    os << GRAY << BOT_L << hRule(19) << T_UP << hRule(36) << T_UP << hRule(32) << BOT_R << RESET << "\n";
 }
 
 void LL1Table::printTable(std::ostream& os) const {
-    os << "\n+-----------------------------------------------------------------------------------------+\n";
-    os << "| TABLA DE ANALISIS SINTACTICO PREDICTIVO LL(1)                                          |\n";
-    os << "+-------------------+-------------------+-------------------------------------------------+\n";
-    os << "| No Terminal       | Terminal          | Produccion M[A, a]                              |\n";
-    os << "+-------------------+-------------------+-------------------------------------------------+\n";
+    using namespace cyberhand::ui;
+    os << "\n" << GRAY << TOP_L << hRule(89) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " TABLA DE ANALISIS SINTACTICO PREDICTIVO LL(1)                                          " << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(19) << T_DOWN << hRule(19) << T_DOWN << hRule(49) << T_LEFT << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << " No Terminal       "
+       << GRAY << V_LINE << BOLD << " Terminal          "
+       << GRAY << V_LINE << BOLD << " Produccion M[A, a]                              "
+       << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(19) << CROSS << hRule(19) << CROSS << hRule(49) << T_LEFT << RESET << "\n";
+
     for (const auto& [key, prods] : table_) {
         const auto& [nt, term] = key;
         for (const auto& p : prods) {
             std::string rhs;
             for (size_t k = 0; k < p.rhs.size(); ++k) { if (k > 0) rhs += " "; rhs += p.rhs[k]; }
             std::string rule_str = "[" + std::to_string(p.id) + "] " + p.lhs + " -> " + rhs;
-            os << "| " << nt << (nt.size() < 18 ? std::string(18 - nt.size(), ' ') : "")
-               << "| " << term << (term.size() < 18 ? std::string(18 - term.size(), ' ') : "")
-               << "| " << rule_str << (rule_str.size() < 48 ? std::string(48 - rule_str.size(), ' ') : "")
-               << "|\n";
+            os << GRAY << V_LINE << CYAN << " " << nt << (nt.size() < 18 ? std::string(18 - nt.size(), ' ') : "")
+               << GRAY << V_LINE << GREEN << " " << term << (term.size() < 18 ? std::string(18 - term.size(), ' ') : "")
+               << GRAY << V_LINE << WHITE << " " << rule_str << (rule_str.size() < 48 ? std::string(48 - rule_str.size(), ' ') : "")
+               << GRAY << V_LINE << RESET << "\n";
         }
     }
-    os << "+-------------------+-------------------+-------------------------------------------------+\n";
-    os << "| Estado: " << (isLL1() ? "GRAMATICA LL(1) VALIDA (0 Conflictos)" : "CONFLICTOS DETECTADOS") << "\n";
-    os << "+-----------------------------------------------------------------------------------------+\n";
+    os << GRAY << T_RIGHT << hRule(89) << T_LEFT << RESET << "\n";
+    std::string status_badge = isLL1() ? (std::string(GREEN) + "GRAMATICA LL(1) VALIDA (0 Conflictos)" + std::string(RESET))
+                                       : (std::string(RED) + "CONFLICTOS DETECTADOS" + std::string(RESET));
+    os << GRAY << V_LINE << WHITE << " Estado: " << status_badge;
+    size_t pad = isLL1() ? 47 : 60;
+    os << std::string(pad, ' ') << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << BOT_L << hRule(89) << BOT_R << RESET << "\n";
 }
 
 } // namespace cyberhand::syntax::ll1

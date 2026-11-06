@@ -1,4 +1,5 @@
 #include "modules/lr0_analyzer/LR0Automaton.hpp"
+#include "core/TUI.hpp"
 #include <algorithm>
 #include <iomanip>
 
@@ -197,27 +198,39 @@ std::string LR0Automaton::formatItem(const Item& item) const {
 }
 
 void LR0Automaton::printStates(std::ostream& os) const {
-    os << "\n=== Coleccion Canonica de Estados LR(0) ===\n";
+    using namespace cyberhand::ui;
+    os << "\n" << BOLD << WHITE << "=== Coleccion Canonica de Estados LR(0) (" << states_.size() << " Estados) ===" << RESET << "\n";
     for (const auto& st : states_) {
-        os << "I" << st.id << ":\n";
-        for (const auto& item : st.items) os << "    " << formatItem(item) << "\n";
+        os << CYAN << "  I" << st.id << ":" << RESET << "\n";
+        for (const auto& item : st.items) {
+            os << GRAY << "    • " << RESET << formatItem(item) << "\n";
+        }
     }
 }
 
 void LR0Automaton::printTable(std::ostream& os) const {
-    os << "\n=== Tablas ACTION y GOTO LR(0) ===\n";
+    using namespace cyberhand::ui;
+    os << "\n" << BOLD << WHITE << "=== Tablas ACTION y GOTO LR(0) ===" << RESET << "\n";
     std::vector<std::string> terms = grammar_.terminals, non_terms;
     terms.push_back(std::string(END_MARKER));
     for (const auto& nt : grammar_.non_terminals) if (nt != grammar_.start_symbol) non_terms.push_back(nt);
 
-    os << "State | ";
+    os << GRAY << TOP_L << hRule(8) << T_DOWN << hRule(49) << T_DOWN << hRule(38) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " State  " << RESET
+       << GRAY << V_LINE << BOLD << CYAN << "  ACTION (Shift/Reduce)                         " << RESET
+       << GRAY << V_LINE << BOLD << GREEN << "  GOTO (Transiciones)                 " << RESET
+       << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(8) << CROSS << hRule(49) << CROSS << hRule(38) << T_LEFT << RESET << "\n";
+
+    os << GRAY << V_LINE << "        " << V_LINE;
     for (const auto& t : terms) os << std::setw(8) << t;
-    os << " | ";
+    os << " " << V_LINE;
     for (const auto& nt : non_terms) os << std::setw(12) << nt;
-    os << "\n" << std::string(80, '-') << "\n";
+    os << "  " << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(8) << CROSS << hRule(49) << CROSS << hRule(38) << T_LEFT << RESET << "\n";
 
     for (const auto& st : states_) {
-        os << std::setw(5) << st.id << " | ";
+        os << GRAY << V_LINE << WHITE << std::setw(6) << st.id << "  " << GRAY << V_LINE;
         for (const auto& t : terms) {
             auto it = action_table_.find({st.id, t});
             std::string c = ".";
@@ -225,25 +238,45 @@ void LR0Automaton::printTable(std::ostream& os) const {
                 c = (it->second.type == ActionType::SHIFT) ? "s" + std::to_string(it->second.target)
                   : (it->second.type == ActionType::REDUCE) ? "r" + std::to_string(it->second.target) : "acc";
             }
-            os << std::setw(8) << c;
+            if (c.starts_with("s")) os << CYAN << std::setw(8) << c << RESET;
+            else if (c.starts_with("r")) os << YELLOW << std::setw(8) << c << RESET;
+            else if (c == "acc") os << GREEN << std::setw(8) << c << RESET;
+            else os << GRAY << std::setw(8) << c << RESET;
         }
-        os << " | ";
+        os << " " << GRAY << V_LINE;
         for (const auto& nt : non_terms) {
             auto git = goto_table_.find({st.id, nt});
-            os << std::setw(12) << (git != goto_table_.end() ? std::to_string(git->second) : ".");
+            std::string val = (git != goto_table_.end() ? std::to_string(git->second) : ".");
+            if (val != ".") os << WHITE << std::setw(12) << val << RESET;
+            else os << GRAY << std::setw(12) << val << RESET;
         }
-        os << "\n";
+        os << "  " << GRAY << V_LINE << RESET << "\n";
     }
+    os << GRAY << BOT_L << hRule(8) << T_UP << hRule(49) << T_UP << hRule(38) << BOT_R << RESET << "\n";
 }
 
 void LR0Automaton::printTrace(const ParseResult& res, std::ostream& os) const {
-    os << "\nPaso | Pila Estados         | Pila Simbolos           | Entrada                        | Accion\n"
-       << std::string(95, '-') << "\n";
+    using namespace cyberhand::ui;
+    os << "\n" << GRAY << TOP_L << hRule(6) << T_DOWN << hRule(22) << T_DOWN << hRule(25) << T_DOWN << hRule(32) << T_DOWN << hRule(18) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " Paso "
+       << GRAY << V_LINE << " Pila Estados        "
+       << GRAY << V_LINE << " Pila Simbolos           "
+       << GRAY << V_LINE << " Entrada                        "
+       << GRAY << V_LINE << " Accion           " << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(6) << CROSS << hRule(22) << CROSS << hRule(25) << CROSS << hRule(32) << CROSS << hRule(18) << T_LEFT << RESET << "\n";
+
     for (const auto& s : res.trace) {
-        os << std::right << std::setw(4) << s.step << " | " << std::setw(20) << std::left << s.stack_str << " | "
-           << std::setw(23) << std::left << s.symbols_str << " | " << std::setw(30) << std::left << s.input_str
-           << " | " << s.action_str << "\n";
+        std::string act_color = (s.action_str == "ACCEPT") ? std::string(GREEN)
+                              : (s.action_str.starts_with("SHIFT")) ? std::string(CYAN)
+                              : (s.action_str.starts_with("REDUCE")) ? std::string(YELLOW) : std::string(RED);
+        os << GRAY << V_LINE << WHITE << std::right << std::setw(5) << s.step << " "
+           << GRAY << V_LINE << CYAN << " " << std::setw(20) << std::left << s.stack_str << " "
+           << GRAY << V_LINE << WHITE << " " << std::setw(23) << std::left << s.symbols_str << " "
+           << GRAY << V_LINE << DIM << " " << std::setw(30) << std::left << s.input_str << " "
+           << GRAY << V_LINE << act_color << " " << std::setw(16) << std::left << s.action_str << " "
+           << GRAY << V_LINE << RESET << "\n";
     }
+    os << GRAY << BOT_L << hRule(6) << T_UP << hRule(22) << T_UP << hRule(25) << T_UP << hRule(32) << T_UP << hRule(18) << BOT_R << RESET << "\n";
 }
 
 } // namespace cyberhand::syntax::lr0

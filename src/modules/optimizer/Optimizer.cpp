@@ -1,4 +1,5 @@
 #include "modules/optimizer/Optimizer.hpp"
+#include "core/TUI.hpp"
 #include <fstream>
 #include <iomanip>
 #include <sstream>
@@ -181,23 +182,26 @@ bool Optimizer::exportTrajectoryJson(const std::vector<intermediate::Quadruple>&
 }
 
 void Optimizer::printOptimizationReport(std::ostream& os) const {
-    os << "\n===============================================================\n"
-       << "       REPORTE DE OPTIMIZACION DE CUADRUPLAS (SEMANA 15)       \n"
-       << "===============================================================\n"
-       << " Original:   " << original_count_ << " instrucciones\n"
-       << " Optimizado: " << optimized_count_ << " instrucciones\n"
-       << " Reduccion:  " << std::fixed << std::setprecision(1) << reduction_percentage_ << "%\n"
-       << "---------------------------------------------------------------\n"
-       << std::left << std::setw(6) << "ID" << std::setw(14) << "OPERADOR"
-       << std::setw(20) << "ARG1" << std::setw(16) << "ARG2" << std::setw(12) << "RESULTADO" << "\n"
-       << "---------------------------------------------------------------\n";
+    using namespace cyberhand::ui;
+    os << "\n" << GRAY << TOP_L << hRule(66) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " REPORTE DE OPTIMIZACION DE CUADRUPLAS (SEMANA 15)                 " << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(66) << T_LEFT << RESET << "\n";
+    os << GRAY << V_LINE << RESET << "  Original:   " << WHITE << std::setw(4) << original_count_ << RESET << " instrucciones" << std::string(33, ' ') << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << V_LINE << RESET << "  Optimizado: " << GREEN << std::setw(4) << optimized_count_ << RESET << " instrucciones" << std::string(33, ' ') << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << V_LINE << RESET << "  Reduccion:  " << YELLOW << BOLD << std::fixed << std::setprecision(1) << reduction_percentage_ << "%" << RESET << std::string(45, ' ') << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(6) << T_DOWN << hRule(14) << T_DOWN << hRule(20) << T_DOWN << hRule(12) << T_DOWN << hRule(10) << T_LEFT << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << " ID   " << GRAY << V_LINE << BOLD << " OPERADOR     " << GRAY << V_LINE << BOLD << " ARG1               " << GRAY << V_LINE << BOLD << " ARG2       " << GRAY << V_LINE << BOLD << " RESULTADO" << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(6) << CROSS << hRule(14) << CROSS << hRule(20) << CROSS << hRule(12) << CROSS << hRule(10) << T_LEFT << RESET << "\n";
     for (const auto& q : optimized_quads_) {
         auto fmt = [](const std::string& s) { return s.empty() ? "_" : s; };
-        os << std::left << std::setw(6) << q.index << std::setw(14) << fmt(q.op)
-           << std::setw(20) << fmt(q.arg1) << std::setw(16) << fmt(q.arg2)
-           << std::setw(12) << fmt(q.result) << "\n";
+        os << GRAY << V_LINE << DIM << " " << std::left << std::setw(4) << q.index << " "
+           << GRAY << V_LINE << CYAN << " " << std::setw(12) << fmt(q.op) << " "
+           << GRAY << V_LINE << WHITE << " " << std::setw(18) << fmt(q.arg1) << " "
+           << GRAY << V_LINE << WHITE << " " << std::setw(10) << fmt(q.arg2) << " "
+           << GRAY << V_LINE << GREEN << " " << std::setw(8)  << fmt(q.result) << " "
+           << GRAY << V_LINE << RESET << "\n";
     }
-    os << "===============================================================\n";
+    os << GRAY << BOT_L << hRule(6) << T_UP << hRule(14) << T_UP << hRule(20) << T_UP << hRule(12) << T_UP << hRule(10) << BOT_R << RESET << "\n";
 }
 
 } // namespace cyberhand::optimizer

@@ -1,4 +1,5 @@
 #include "modules/intermediate/CodeGenerator.hpp"
+#include "core/TUI.hpp"
 #include <sstream>
 #include <iomanip>
 #include <cmath>
@@ -87,28 +88,54 @@ void CodeGenerator::visit(cyberhand::core::VariableExprNode& n) {
 
 static std::string renderTable(const std::vector<std::string>& hdrs,
                                const std::vector<std::vector<std::string>>& rows) {
+    using namespace cyberhand::ui;
     std::vector<size_t> w(hdrs.size());
     for (size_t i = 0; i < hdrs.size(); ++i) w[i] = hdrs[i].size();
     for (const auto& row : rows)
         for (size_t i = 0; i < row.size(); ++i) w[i] = std::max(w[i], row[i].size());
 
-    auto sep = [&]() {
-        std::string s = "+";
-        for (size_t x : w) s += std::string(x + 2, '-') + "+";
-        return s + "\n";
-    };
     std::ostringstream out;
-    out << sep() << "|";
-    for (size_t i = 0; i < hdrs.size(); ++i)
-        out << " " << std::left << std::setw(w[i]) << hdrs[i] << " |";
-    out << "\n" << sep();
+    out << "\n" << GRAY << TOP_L;
+    for (size_t i = 0; i < w.size(); ++i) {
+        out << hRule(w[i] + 2);
+        if (i + 1 < w.size()) out << T_DOWN;
+        else out << TOP_R;
+    }
+    out << RESET << "\n";
+
+    out << GRAY << V_LINE << BOLD << WHITE;
+    for (size_t i = 0; i < hdrs.size(); ++i) {
+        out << " " << std::left << std::setw(w[i]) << hdrs[i] << " " << GRAY << V_LINE << BOLD << WHITE;
+    }
+    out << RESET << "\n";
+
+    out << GRAY << T_RIGHT;
+    for (size_t i = 0; i < w.size(); ++i) {
+        out << hRule(w[i] + 2);
+        if (i + 1 < w.size()) out << CROSS;
+        else out << T_LEFT;
+    }
+    out << RESET << "\n";
+
     for (const auto& row : rows) {
-        out << "|";
-        for (size_t i = 0; i < row.size(); ++i)
-            out << " " << std::left << std::setw(w[i]) << row[i] << " |";
+        out << GRAY << V_LINE << RESET;
+        for (size_t i = 0; i < row.size(); ++i) {
+            std::string val = row[i];
+            if (i == 0) out << DIM << " " << std::setw(w[i]) << val << " " << RESET;
+            else if (i == 1) out << CYAN << " " << std::setw(w[i]) << val << " " << RESET;
+            else out << WHITE << " " << std::setw(w[i]) << val << " " << RESET;
+            out << GRAY << V_LINE << RESET;
+        }
         out << "\n";
     }
-    out << sep();
+
+    out << GRAY << BOT_L;
+    for (size_t i = 0; i < w.size(); ++i) {
+        out << hRule(w[i] + 2);
+        if (i + 1 < w.size()) out << T_UP;
+        else out << BOT_R;
+    }
+    out << RESET << "\n";
     return out.str();
 }
 

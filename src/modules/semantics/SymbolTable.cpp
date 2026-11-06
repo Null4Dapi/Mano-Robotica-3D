@@ -1,4 +1,5 @@
 #include "modules/semantics/SymbolTable.hpp"
+#include "core/TUI.hpp"
 #include <iomanip>
 
 namespace cyberhand::semantics {
@@ -74,17 +75,29 @@ const Symbol* SymbolTable::lookupCurrentScope(const std::string& name) const {
 }
 
 void SymbolTable::printTable(std::ostream& os) const {
-    os << "+----------------------+------------+------------+-------+------+\n"
-       << "| Identifier           | Type       | Category   | Scope | Line |\n"
-       << "+----------------------+------------+------------+-------+------+\n";
+    using namespace cyberhand::ui;
+    os << "\n" << GRAY << TOP_L << hRule(22) << T_DOWN << hRule(12) << T_DOWN << hRule(12) << T_DOWN << hRule(7) << T_DOWN << hRule(6) << TOP_R << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " Identifier           "
+       << GRAY << V_LINE << " Type       "
+       << GRAY << V_LINE << " Category   "
+       << GRAY << V_LINE << " Scope "
+       << GRAY << V_LINE << " Line " << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << T_RIGHT << hRule(22) << CROSS << hRule(12) << CROSS << hRule(12) << CROSS << hRule(7) << CROSS << hRule(6) << T_LEFT << RESET << "\n";
+
     for (const auto& s : all_symbols_) {
-        os << "| " << std::left << std::setw(20) << s.name
-           << " | " << std::setw(10) << dataTypeToString(s.type)
-           << " | " << std::setw(10) << categoryToString(s.category)
-           << " | " << std::setw(5)  << s.scope_level
-           << " | " << std::setw(4)  << s.line << " |\n";
+        std::string cat_str(categoryToString(s.category));
+        std::string cat_color = (cat_str == "ACTUATOR") ? std::string(CYAN)
+                              : (cat_str == "VARIABLE") ? std::string(WHITE) : std::string(YELLOW);
+        std::string scope_str = (s.scope_level == 0) ? "global" : "local";
+
+        os << GRAY << V_LINE << WHITE << " " << std::left << std::setw(20) << s.name << " "
+           << GRAY << V_LINE << GREEN << " " << std::setw(10) << dataTypeToString(s.type) << " "
+           << GRAY << V_LINE << cat_color << " " << std::setw(10) << cat_str << " "
+           << GRAY << V_LINE << DIM << " " << std::setw(5)  << s.scope_level << " "
+           << GRAY << V_LINE << GRAY << " " << std::setw(4)  << s.line << " "
+           << GRAY << V_LINE << RESET << "\n";
     }
-    os << "+----------------------+------------+------------+-------+------+\n";
+    os << GRAY << BOT_L << hRule(22) << T_UP << hRule(12) << T_UP << hRule(12) << T_UP << hRule(7) << T_UP << hRule(6) << BOT_R << RESET << "\n";
 }
 
 } // namespace cyberhand::semantics

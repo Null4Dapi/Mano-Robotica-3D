@@ -8,6 +8,7 @@
 #include <cctype>
 
 #include "grammar/ParserDriver.hpp"
+#include "core/TUI.hpp"
 #include "modules/ll1_analyzer/LL1Table.hpp"
 #include "modules/lr0_analyzer/LR0Automaton.hpp"
 #include "modules/semantics/SemanticAnalyzer.hpp"
@@ -18,54 +19,33 @@
 namespace {
 
 void printHelp() {
-    std::cout << R"(================================================================================
- CYBERHAND COMPILER & KINEMATIC VIRTUAL MACHINE (C++20)
- Asignatura: Autómatas y Compiladores - Semanas 10 a 15
- Plataforma: Mano Robótica Articulada 3D (18 GDL)
-================================================================================
-
-USO:
-  bin/cyberhand_compiler [OPCIÓN] [PARÁMETROS]
-
-OPCIONES DISPONIBLES:
-  -h, --help                     Muestra este menú de ayuda con el temario académico.
-  --analisis-ll1                 (Semana 10) Ejecuta el analizador predictivo LL(1):
-                                 conjuntos PRIMERO, SIGUIENTE, tabla sintáctica y traza.
-  --analisis-lr0                 (Semana 11) Ejecuta el analizador ascendente LR(0):
-                                 10 estados canónicos, tablas ACTION/GOTO y traza.
-  --tabla-simbolos <archivo.rob> (Semana 13) Muestra la Tabla de Símbolos con ámbitos,
-                                 tipos, categorías y actuadores cinemáticos.
-  --cuadruplas <archivo.rob>     (Semana 14) Genera Código Intermedio (TAC) y muestra
-                                 las tablas comparativas de Cuádruplas y Triplas.
-  --optimizar <archivo.rob>      (Semana 15) Ejecuta optimización en bloques básicos
-                                 (folding, propagación, DCE) y emite reporte.
-  --compilar <archivo.rob> [-o salida.json]
-                                 Compilación completa end-to-end:
-                                 Parseo AST (Semana 12), Semántica [0°, 90°] (Semana 13),
-                                 TAC Cuádruplas (Semana 14), Optimización (Semana 15)
-                                 y exportación de trayectoria JSON para visor web 3D.
-                                 (Salida por defecto: web/trayectoria.json)
-
-DESCRIPCIÓN ACADÉMICA (SEMANAS 10 A 15):
-  * Semana 10: Análisis Sintáctico Predictivo LL(1).
-    Cálculo formal de conjuntos PRIMERO y SIGUIENTE, construcción de tabla
-    predictiva M[A, a] y justificación de ausencia de conflictos.
-  * Semana 11: Análisis Sintáctico Ascendente LR(0).
-    Gramática aumentada, autómata canónico (10 estados vía CLAUSURA e IR_A),
-    tablas ACTION / GOTO y simulación Shift/Reduce.
-  * Semana 12: Generadores de Analizadores Sintácticos (Flex & Bison).
-    Scanner léxico en scanner.l y Parser LALR(1) en parser.y generando el AST.
-  * Semana 13: Análisis Semántico y Tabla de Símbolos.
-    Gestión de ámbitos local/global, verificación de tipos y restricción física
-    biomecánica en rango [0°, 90°].
-  * Semana 14: Generación de Código Intermedio.
-    Traducción del AST a Código de Tres Direcciones (TAC), matriz de Cuádruplas
-    y Triplas con temporales y etiquetas.
-  * Semana 15: Optimización y Código Objeto.
-    Particionado en bloques básicos, plegado de constantes, propagación de copias,
-    DCE cinemático (reducción >= 15%) y emisión de trayectoria JSON para Three.js.
-================================================================================
-)";
+    using namespace cyberhand::ui;
+    std::cout << "\n" << GRAY << TOP_L << hRule(78) << TOP_R << RESET << "\n"
+              << GRAY << V_LINE << " " << BOLD << WHITE << "CYBERHAND COMPILER & KINEMATIC VIRTUAL MACHINE (C++20)" << RESET
+              << std::string(24, ' ') << GRAY << V_LINE << RESET << "\n"
+              << GRAY << V_LINE << " " << DIM << "Asignatura: Autómatas y Compiladores - Semanas 10 a 15 · 18 GDL" << RESET
+              << std::string(15, ' ') << GRAY << V_LINE << RESET << "\n"
+              << GRAY << BOT_L << hRule(78) << BOT_R << RESET << "\n\n"
+              << BOLD << WHITE << "USO:\n" << RESET
+              << "  bin/cyberhand_compiler " << CYAN << "[OPCIÓN] [PARÁMETROS]" << RESET << "\n\n"
+              << BOLD << WHITE << "OPCIONES DISPONIBLES:\n" << RESET
+              << "  " << CYAN << "-h, --help" << RESET << "                     Muestra este menú de ayuda con el temario académico.\n"
+              << "  " << CYAN << "--analisis-ll1" << RESET << "                 (Semana 10) Analizador predictivo LL(1): FIRST, FOLLOW y tabla.\n"
+              << "  " << CYAN << "--analisis-lr0" << RESET << "                 (Semana 11) Analizador ascendente LR(0): 10 estados y ACTION/GOTO.\n"
+              << "  " << CYAN << "--tabla-simbolos <archivo.rob>" << RESET << " (Semana 13) Tabla de Símbolos con ámbitos y actuadores.\n"
+              << "  " << CYAN << "--cuadruplas <archivo.rob>" << RESET << "     (Semana 14) Código Intermedio (TAC), Cuádruplas y Triplas.\n"
+              << "  " << CYAN << "--optimizar <archivo.rob>" << RESET << "      (Semana 15) Optimización en bloques básicos (folding, DCE).\n"
+              << "  " << CYAN << "--compilar <archivo.rob> [-o salida.json]" << RESET << "\n"
+              << "                                 Pipeline completo: parsing, semántica [0°, 90°], TAC,\n"
+              << "                                 optimización y exportación de trayectoria JSON.\n"
+              << "                                 (Salida por defecto: web/trayectoria.json)\n\n"
+              << BOLD << WHITE << "DESCRIPCIÓN ACADÉMICA (SEMANAS 10 A 15):\n" << RESET
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 10:" << RESET << " Análisis Sintáctico Predictivo LL(1) (FIRST, FOLLOW, Tabla M[A,a]).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 11:" << RESET << " Análisis Sintáctico Ascendente LR(0) (10 Estados, Shift/Reduce).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 12:" << RESET << " Generadores Flex & Bison generando el AST tipado en C++.\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 13:" << RESET << " Análisis Semántico y Tabla de Símbolos (Rangos [0°, 90°]).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 14:" << RESET << " Generación de Código Intermedio (TAC en Cuádruplas y Triplas).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 15:" << RESET << " Optimización en Bloques Básicos y Emisión de Trayectoria 3D.\n";
 }
 
 std::string normalizeRobScript(const std::string& input) {
@@ -111,10 +91,24 @@ std::string readFileContents(const std::string& filepath) {
     return buffer.str();
 }
 
+void printHeader(std::string_view title, std::string_view subtitle = "") {
+    using namespace cyberhand::ui;
+    std::cout << "\n" << GRAY << TOP_L << hRule(78) << TOP_R << "\n"
+              << V_LINE << " " << BOLD << CYAN << title << RESET;
+    size_t title_len = title.size() + 1;
+    if (title_len < 78) std::cout << std::string(78 - title_len, ' ');
+    std::cout << GRAY << V_LINE << "\n";
+    if (!subtitle.empty()) {
+        std::cout << V_LINE << " " << DIM << subtitle << RESET;
+        size_t sub_len = subtitle.size() + 1;
+        if (sub_len < 78) std::cout << std::string(78 - sub_len, ' ');
+        std::cout << GRAY << V_LINE << "\n";
+    }
+    std::cout << BOT_L << hRule(78) << BOT_R << RESET << "\n\n";
+}
+
 int runLL1Analysis() {
-    std::cout << "\n================================================================================\n"
-              << " [SEMANA 10] ANALIZADOR SINTÁCTICO PREDICTIVO LL(1)\n"
-              << "================================================================================\n\n";
+    printHeader("[SEMANA 10] ANALIZADOR SINTÁCTICO PREDICTIVO LL(1)");
 
     auto grammar = cyberhand::syntax::ll1::Grammar::createKinematicGrammar();
     cyberhand::syntax::ll1::LL1Table analyzer(grammar);
@@ -146,9 +140,7 @@ int runLL1Analysis() {
 }
 
 int runLR0Analysis() {
-    std::cout << "\n================================================================================\n"
-              << " [SEMANA 11] ANALIZADOR SINTÁCTICO ASCENDENTE LR(0)\n"
-              << "================================================================================\n\n";
+    printHeader("[SEMANA 11] ANALIZADOR SINTÁCTICO ASCENDENTE LR(0)");
 
     auto grammar = cyberhand::syntax::lr0::Grammar::createKinematicGrammar();
     cyberhand::syntax::lr0::LR0Automaton automaton(grammar);
@@ -178,10 +170,7 @@ int runLR0Analysis() {
 }
 
 int runSymbolTable(const std::string& filepath) {
-    std::cout << "\n================================================================================\n"
-              << " [SEMANA 13] TABLA DE SÍMBOLOS Y GESTIÓN DE ÁMBITOS\n"
-              << " Archivo: " << filepath << "\n"
-              << "================================================================================\n\n";
+    printHeader("[SEMANA 13] TABLA DE SÍMBOLOS Y GESTIÓN DE ÁMBITOS", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -215,10 +204,7 @@ int runSymbolTable(const std::string& filepath) {
 }
 
 int runQuadruples(const std::string& filepath) {
-    std::cout << "\n================================================================================\n"
-              << " [SEMANA 14] GENERACIÓN DE CÓDIGO INTERMEDIO (TAC, CUÁDRUPLAS Y TRIPLAS)\n"
-              << " Archivo: " << filepath << "\n"
-              << "================================================================================\n\n";
+    printHeader("[SEMANA 14] GENERACIÓN DE CÓDIGO INTERMEDIO (TAC, CUÁDRUPLAS Y TRIPLAS)", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -256,10 +242,7 @@ int runQuadruples(const std::string& filepath) {
 }
 
 int runOptimize(const std::string& filepath) {
-    std::cout << "\n================================================================================\n"
-              << " [SEMANA 15] OPTIMIZACIÓN DE BLOQUES BÁSICOS Y CÓDIGO INTERMEDIO\n"
-              << " Archivo: " << filepath << "\n"
-              << "================================================================================\n\n";
+    printHeader("[SEMANA 15] OPTIMIZACIÓN DE BLOQUES BÁSICOS Y CÓDIGO INTERMEDIO", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -333,17 +316,18 @@ int runCompile(const std::string& filepath, const std::string& out_path) {
         return 1;
     }
 
-    std::cout << "\n================================================================================\n"
-              << " COMPILACIÓN CINEMÁTICA EXITOSA (SEMANA 10 A 15)\n"
-              << "================================================================================\n"
-              << " Archivo fuente:           " << filepath << "\n"
-              << " Archivo de trayectoria:   " << out_path << "\n"
-              << " Instrucciones TAC orig:   " << codegen.quadruples().size() << "\n"
-              << " Instrucciones optimizadas:" << opt_quads.size() << "\n"
-              << " Porcentaje de reducción:  " << optimizer.reductionPercentage() << "%\n"
-              << " Grados de libertad (GDL): 18 articulaciones (dedos + muñeca)\n"
-              << " Estado para visor web 3D: LISTO PARA REPRODUCCIÓN\n"
-              << "================================================================================\n\n";
+    std::cout << "\n" << cyberhand::ui::GRAY << cyberhand::ui::TOP_L << cyberhand::ui::hRule(78) << cyberhand::ui::TOP_R << "\n"
+              << cyberhand::ui::V_LINE << " " << cyberhand::ui::BOLD << cyberhand::ui::GREEN << "COMPILACIÓN CINEMÁTICA EXITOSA (SEMANA 10 A 15)" << cyberhand::ui::RESET
+              << std::string(30, ' ') << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::T_RIGHT << cyberhand::ui::hRule(78) << cyberhand::ui::T_LEFT << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Archivo fuente:          " << cyberhand::ui::RESET << std::setw(49) << std::left << filepath << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Archivo de trayectoria:  " << cyberhand::ui::RESET << std::setw(49) << std::left << out_path << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Instrucciones TAC orig:  " << cyberhand::ui::CYAN << std::setw(49) << std::left << codegen.quadruples().size() << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Instrucciones optimiz:   " << cyberhand::ui::GREEN << std::setw(49) << std::left << opt_quads.size() << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Porcentaje de reducción: " << cyberhand::ui::YELLOW << std::setw(49) << std::left << (std::to_string(optimizer.reductionPercentage()) + "%") << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Grados de libertad (GDL):" << cyberhand::ui::RESET << std::setw(49) << std::left << "18 articulaciones (dedos + muñeca)" << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Estado para visor web 3D:" << cyberhand::ui::GREEN << std::setw(49) << std::left << "LISTO PARA REPRODUCCIÓN" << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::BOT_L << cyberhand::ui::hRule(78) << cyberhand::ui::BOT_R << cyberhand::ui::RESET << "\n\n";
 
     return 0;
 }
