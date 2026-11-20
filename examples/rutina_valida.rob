@@ -27,10 +27,20 @@ inicio
     rotar pulgar falange_2 40 grados;
     rotar pulgar falange_3 35 grados;
 
+    // 1.5 Orientación espacial de la muñeca (3 GDL carpo)
+    rotar muneca eje_x 15 grados;
+    rotar muneca eje_y 20 grados;
+    rotar muneca eje_z 10 grados;
+
     // Pausa cinemática con agarre cerrado
     esperar 300 ms;
 
     // FASE 2: EXTENSIÓN Y APERTURA COMPLETA
+    // Retorno neutral de muñeca
+    rotar muneca eje_x 0 grados;
+    rotar muneca eje_y 0 grados;
+    rotar muneca eje_z 0 grados;
+
     // Liberar pulgar
     rotar pulgar falange_1 0 grados;
     rotar pulgar falange_2 0 grados;

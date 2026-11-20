@@ -4,7 +4,7 @@
 
 int main() {
     using namespace cyberhand::syntax::lr0;
-    std::cout << "=== Test LR(0) Bottom-Up Syntax Analyzer (Semana 11) ===\n";
+    std::cout << "=== Test LR(0) Bottom-Up Syntax Analyzer ===\n";
 
     // 1. Gramática Cinemática LR(0) y Autómata
     Grammar kin_grammar = Grammar::createKinematicGrammar();

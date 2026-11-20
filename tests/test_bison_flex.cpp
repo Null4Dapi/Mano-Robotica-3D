@@ -9,7 +9,7 @@ int main() {
     using namespace cyberhand::grammar;
     using namespace cyberhand::core;
 
-    std::cout << "=== Test Flex & Bison Automated Parser (Semana 12) ===\n";
+    std::cout << "=== Test Flex & Bison Automated Parser ===\n";
 
     ParserDriver driver;
 

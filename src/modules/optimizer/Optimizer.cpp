@@ -193,7 +193,7 @@ bool Optimizer::exportTrajectoryJson(const std::vector<intermediate::Quadruple>&
 void Optimizer::printOptimizationReport(std::ostream& os) const {
     using namespace cyberhand::ui;
     os << "\n" << GRAY << TOP_L << hRule(66) << TOP_R << RESET << "\n";
-    os << GRAY << V_LINE << BOLD << WHITE << " REPORTE DE OPTIMIZACION DE CUADRUPLAS (SEMANA 15)                 " << GRAY << V_LINE << RESET << "\n";
+    os << GRAY << V_LINE << BOLD << WHITE << " REPORTE DE OPTIMIZACIÓN DE CUÁDRUPLAS TAC                          " << GRAY << V_LINE << RESET << "\n";
     os << GRAY << T_RIGHT << hRule(66) << T_LEFT << RESET << "\n";
     os << GRAY << V_LINE << RESET << "  Original:   " << WHITE << std::setw(4) << original_count_ << RESET << " instrucciones" << std::string(33, ' ') << GRAY << V_LINE << RESET << "\n";
     os << GRAY << V_LINE << RESET << "  Optimizado: " << GREEN << std::setw(4) << optimized_count_ << RESET << " instrucciones" << std::string(33, ' ') << GRAY << V_LINE << RESET << "\n";

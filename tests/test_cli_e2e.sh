@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ==============================================================================
-# PRUEBAS END-TO-END (E2E) - CLI COMPILADOR CINEMÁTICO (SEMANAS 10 A 15)
+# PRUEBAS END-TO-END (E2E) - CLI COMPILADOR CINEMÁTICO (18 GDL)
 # ==============================================================================
 
 BIN="./bin/cyberhand_compiler"
@@ -18,7 +18,7 @@ TOTAL_TESTS=8
 PASSED_TESTS=0
 
 echo -e "${BLUE}=================================================================${NC}"
-echo -e "${BLUE}  SUITE E2E: CLI UNIFICADO DEL COMPILADOR CYBERHAND (SEMANAS 10-15)${NC}"
+echo -e "${BLUE}  SUITE E2E: CLI UNIFICADO DEL COMPILADOR CYBERHAND (18 GDL)${NC}"
 echo -e "${BLUE}=================================================================${NC}"
 
 if [ ! -f "$BIN" ]; then
@@ -31,7 +31,7 @@ fi
 # ------------------------------------------------------------------------------
 echo -n "a) Test --help / -h ... "
 OUT_HELP=$($BIN --help)
-if echo "$OUT_HELP" | grep -q "CYBERHAND COMPILER" && echo "$OUT_HELP" | grep -q "Semanas 10 a 15"; then
+if echo "$OUT_HELP" | grep -q "CYBERHAND COMPILER" && echo "$OUT_HELP" | grep -q "18 GDL"; then
     echo -e "${GREEN}PASSED${NC}"
     PASSED_TESTS=$((PASSED_TESTS + 1))
 else
@@ -112,7 +112,7 @@ fi
 # ------------------------------------------------------------------------------
 echo -n "f) Test --optimizar examples/rutina_valida.rob ... "
 OUT_OPT=$($BIN --optimizar examples/rutina_valida.rob)
-if echo "$OUT_OPT" | grep -q "REPORTE DE OPTIMIZACION DE CUADRUPLAS" && \
+if echo "$OUT_OPT" | grep -qi "REPORTE DE OPTIMIZA" && \
    echo "$OUT_OPT" | grep -q "Reduccion:"; then
     echo -e "${GREEN}PASSED${NC}"
     PASSED_TESTS=$((PASSED_TESTS + 1))

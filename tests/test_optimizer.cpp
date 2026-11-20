@@ -9,7 +9,7 @@ int main() {
     using namespace cyberhand::intermediate;
     using namespace cyberhand::optimizer;
 
-    std::cout << "=== Test Basic Block Optimizer & Trajectory Exporter (Semana 15) ===\n";
+    std::cout << "=== Test Basic Block Optimizer & Trajectory Exporter ===\n";
     Optimizer optimizer;
 
     // Test a: Basic block partitioning & leader identification

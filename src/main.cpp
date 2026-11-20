@@ -23,29 +23,29 @@ void printHelp() {
     std::cout << "\n" << GRAY << TOP_L << hRule(78) << TOP_R << RESET << "\n"
               << GRAY << V_LINE << " " << BOLD << WHITE << "CYBERHAND COMPILER & KINEMATIC VIRTUAL MACHINE (C++20)" << RESET
               << std::string(24, ' ') << GRAY << V_LINE << RESET << "\n"
-              << GRAY << V_LINE << " " << DIM << "Asignatura: Autómatas y Compiladores - Semanas 10 a 15 · 18 GDL" << RESET
-              << std::string(15, ' ') << GRAY << V_LINE << RESET << "\n"
+              << GRAY << V_LINE << " " << DIM << "Sistema Integral de Compilación y Control Cinemático · 18 GDL" << RESET
+              << std::string(13, ' ') << GRAY << V_LINE << RESET << "\n"
               << GRAY << BOT_L << hRule(78) << BOT_R << RESET << "\n\n"
               << BOLD << WHITE << "USO:\n" << RESET
               << "  bin/cyberhand_compiler " << CYAN << "[OPCIÓN] [PARÁMETROS]" << RESET << "\n\n"
               << BOLD << WHITE << "OPCIONES DISPONIBLES:\n" << RESET
-              << "  " << CYAN << "-h, --help" << RESET << "                     Muestra este menú de ayuda con el temario académico.\n"
-              << "  " << CYAN << "--analisis-ll1" << RESET << "                 (Semana 10) Analizador predictivo LL(1): FIRST, FOLLOW y tabla.\n"
-              << "  " << CYAN << "--analisis-lr0" << RESET << "                 (Semana 11) Analizador ascendente LR(0): 10 estados y ACTION/GOTO.\n"
-              << "  " << CYAN << "--tabla-simbolos <archivo.rob>" << RESET << " (Semana 13) Tabla de Símbolos con ámbitos y actuadores.\n"
-              << "  " << CYAN << "--cuadruplas <archivo.rob>" << RESET << "     (Semana 14) Código Intermedio (TAC), Cuádruplas y Triplas.\n"
-              << "  " << CYAN << "--optimizar <archivo.rob>" << RESET << "      (Semana 15) Optimización en bloques básicos (folding, DCE).\n"
+              << "  " << CYAN << "-h, --help" << RESET << "                     Muestra este menú de ayuda de la arquitectura.\n"
+              << "  " << CYAN << "--analisis-ll1" << RESET << "                 Analizador predictivo LL(1): FIRST, FOLLOW y tabla.\n"
+              << "  " << CYAN << "--analisis-lr0" << RESET << "                 Analizador ascendente LR(0): colección canónica y ACTION/GOTO.\n"
+              << "  " << CYAN << "--tabla-simbolos <archivo.rob>" << RESET << " Tabla de Símbolos con ámbitos y actuadores.\n"
+              << "  " << CYAN << "--cuadruplas <archivo.rob>" << RESET << "     Código Intermedio (TAC), Cuádruplas y Triplas.\n"
+              << "  " << CYAN << "--optimizar <archivo.rob>" << RESET << "      Optimización en bloques básicos (folding, DCE).\n"
               << "  " << CYAN << "--compilar <archivo.rob> [-o salida.json]" << RESET << "\n"
               << "                                 Pipeline completo: parsing, semántica [0°, 90°], TAC,\n"
               << "                                 optimización y exportación de trayectoria JSON.\n"
               << "                                 (Salida por defecto: web/trayectoria.json)\n\n"
-              << BOLD << WHITE << "DESCRIPCIÓN ACADÉMICA (SEMANAS 10 A 15):\n" << RESET
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 10:" << RESET << " Análisis Sintáctico Predictivo LL(1) (FIRST, FOLLOW, Tabla M[A,a]).\n"
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 11:" << RESET << " Análisis Sintáctico Ascendente LR(0) (10 Estados, Shift/Reduce).\n"
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 12:" << RESET << " Generadores Flex & Bison generando el AST tipado en C++.\n"
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 13:" << RESET << " Análisis Semántico y Tabla de Símbolos (Rangos [0°, 90°]).\n"
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 14:" << RESET << " Generación de Código Intermedio (TAC en Cuádruplas y Triplas).\n"
-              << "  " << GRAY << "•" << RESET << " " << BOLD << "Semana 15:" << RESET << " Optimización en Bloques Básicos y Emisión de Trayectoria 3D.\n";
+              << BOLD << WHITE << "SUBSISTEMAS DEL PIPELINE CINEMÁTICO:\n" << RESET
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Frontend LL(1):" << RESET << " Análisis Sintáctico Predictivo (FIRST, FOLLOW, Tabla M[A,a]).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Frontend LR(0):" << RESET << " Análisis Sintáctico Ascendente (Colección canónica, Shift/Reduce).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Parser & AST:" << RESET << " Generadores Flex & Bison generando el AST tipado en C++.\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Motor Semántico:" << RESET << " Tabla de Símbolos y Validación Biomecánica (Rangos [0°, 90°]).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Representación IR:" << RESET << " Generación de Código Intermedio (TAC en Cuádruplas y Triplas).\n"
+              << "  " << GRAY << "•" << RESET << " " << BOLD << "Optimizador:" << RESET << " Bloques Básicos, DCE y Emisión de Trayectoria 3D (18 GDL).\n";
 }
 
 std::string normalizeRobScript(const std::string& input) {
@@ -108,7 +108,7 @@ void printHeader(std::string_view title, std::string_view subtitle = "") {
 }
 
 int runLL1Analysis() {
-    printHeader("[SEMANA 10] ANALIZADOR SINTÁCTICO PREDICTIVO LL(1)");
+    printHeader("ANALIZADOR SINTÁCTICO PREDICTIVO LL(1)");
 
     auto grammar = cyberhand::syntax::ll1::Grammar::createKinematicGrammar();
     cyberhand::syntax::ll1::LL1Table analyzer(grammar);
@@ -140,7 +140,7 @@ int runLL1Analysis() {
 }
 
 int runLR0Analysis() {
-    printHeader("[SEMANA 11] ANALIZADOR SINTÁCTICO ASCENDENTE LR(0)");
+    printHeader("ANALIZADOR SINTÁCTICO ASCENDENTE LR(0)");
 
     auto grammar = cyberhand::syntax::lr0::Grammar::createKinematicGrammar();
     cyberhand::syntax::lr0::LR0Automaton automaton(grammar);
@@ -170,7 +170,7 @@ int runLR0Analysis() {
 }
 
 int runSymbolTable(const std::string& filepath) {
-    printHeader("[SEMANA 13] TABLA DE SÍMBOLOS Y GESTIÓN DE ÁMBITOS", "Archivo: " + filepath);
+    printHeader("TABLA DE SÍMBOLOS Y GESTIÓN DE ÁMBITOS", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -204,7 +204,7 @@ int runSymbolTable(const std::string& filepath) {
 }
 
 int runQuadruples(const std::string& filepath) {
-    printHeader("[SEMANA 14] GENERACIÓN DE CÓDIGO INTERMEDIO (TAC, CUÁDRUPLAS Y TRIPLAS)", "Archivo: " + filepath);
+    printHeader("GENERACIÓN DE CÓDIGO INTERMEDIO (TAC, CUÁDRUPLAS Y TRIPLAS)", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -234,7 +234,7 @@ int runQuadruples(const std::string& filepath) {
     std::cout << ">> 1. TABLA DE CUÁDRUPLAS (OP, ARG1, ARG2, RES):\n"
               << codegen.dumpQuadruples() << "\n";
 
-    std::cout << ">> 2. TABLA DE TRIPLAS (COMPARATIVA TEÓRICA SEMANA 14):\n"
+    std::cout << ">> 2. TABLA DE TRIPLAS (REPRESENTACIÓN COMPACTA EN MEMORIA):\n"
               << codegen.dumpTriples() << "\n";
 
     std::cout << ">> [ÉXITO]: " << codegen.quadruples().size() << " cuádruplas generadas exitosamente.\n";
@@ -242,7 +242,7 @@ int runQuadruples(const std::string& filepath) {
 }
 
 int runOptimize(const std::string& filepath) {
-    printHeader("[SEMANA 15] OPTIMIZACIÓN DE BLOQUES BÁSICOS Y CÓDIGO INTERMEDIO", "Archivo: " + filepath);
+    printHeader("OPTIMIZACIÓN DE BLOQUES BÁSICOS Y CÓDIGO INTERMEDIO", "Archivo: " + filepath);
 
     std::string raw = readFileContents(filepath);
     if (raw.empty()) return 1;
@@ -317,8 +317,8 @@ int runCompile(const std::string& filepath, const std::string& out_path) {
     }
 
     std::cout << "\n" << cyberhand::ui::GRAY << cyberhand::ui::TOP_L << cyberhand::ui::hRule(78) << cyberhand::ui::TOP_R << "\n"
-              << cyberhand::ui::V_LINE << " " << cyberhand::ui::BOLD << cyberhand::ui::GREEN << "COMPILACIÓN CINEMÁTICA EXITOSA (SEMANA 10 A 15)" << cyberhand::ui::RESET
-              << std::string(30, ' ') << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
+              << cyberhand::ui::V_LINE << " " << cyberhand::ui::BOLD << cyberhand::ui::GREEN << "COMPILACIÓN CINEMÁTICA EXITOSA (18 GDL)" << cyberhand::ui::RESET
+              << std::string(38, ' ') << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
               << cyberhand::ui::T_RIGHT << cyberhand::ui::hRule(78) << cyberhand::ui::T_LEFT << "\n"
               << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Archivo fuente:          " << cyberhand::ui::RESET << std::setw(49) << std::left << filepath << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"
               << cyberhand::ui::V_LINE << "  " << cyberhand::ui::WHITE << "Archivo de trayectoria:  " << cyberhand::ui::RESET << std::setw(49) << std::left << out_path << cyberhand::ui::GRAY << cyberhand::ui::V_LINE << "\n"

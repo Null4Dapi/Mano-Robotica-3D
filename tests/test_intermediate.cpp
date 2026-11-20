@@ -7,7 +7,7 @@ int main() {
     using namespace cyberhand::grammar;
     using namespace cyberhand::intermediate;
 
-    std::cout << "=== Test Intermediate Code Generator (Semana 14) ===\n";
+    std::cout << "=== Test Intermediate Code Generator ===\n";
     ParserDriver driver;
     CodeGenerator codegen;
 
@@ -109,7 +109,7 @@ int main() {
 
         std::cout << "PASSED\n";
         std::cout << "\n--- Tabla de Cuádruplas ---\n" << quad_str;
-        std::cout << "\n--- Tabla de Triplas (Comparativa Teórica Semana 14) ---\n" << trip_str;
+        std::cout << "\n--- Tabla de Triplas (Comparativa Teórica) ---\n" << trip_str;
     }
 
     std::cout << "\nTodas las pruebas de Generación de Código Intermedio pasaron exitosamente.\n";

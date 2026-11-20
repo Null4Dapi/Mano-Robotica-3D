@@ -9,7 +9,7 @@ int main() {
     using namespace cyberhand::grammar;
     using namespace cyberhand::semantics;
 
-    std::cout << "=== Test Semantic Analyzer & Symbol Table (Semana 13) ===\n";
+    std::cout << "=== Test Semantic Analyzer & Symbol Table ===\n";
 
     ParserDriver driver;
 
@@ -192,6 +192,6 @@ int main() {
         std::cout << "PASSED (Actuadores invalidos y tipos incompatibles rechazados)\n";
     }
 
-    std::cout << "\n>> TODAS LAS PRUEBAS SEMANTICAS (SEMANA 13) PASARON CON EXITO <<\n";
+    std::cout << "\n>> TODAS LAS PRUEBAS SEMANTICAS PASARON CON EXITO <<\n";
     return 0;
 }

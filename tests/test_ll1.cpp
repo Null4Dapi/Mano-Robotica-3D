@@ -5,7 +5,7 @@
 int main() {
     using namespace cyberhand::syntax::ll1;
 
-    std::cout << "=== Test LL(1) Analyzer (Semana 10) ===\n";
+    std::cout << "=== Test LL(1) Analyzer ===\n";
     Grammar grammar = Grammar::createKinematicGrammar();
     LL1Table analyzer(grammar);
 
