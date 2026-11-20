@@ -41,9 +41,9 @@
         "MENIQUE_DISTAL": 35.0,
         "MENIQUE_MEDIAL": 60.0,
         "MENIQUE_PROXIMAL": 45.0,
-        "MUNICA_PITCH": 0.0,
-        "MUNICA_ROLL": 0.0,
-        "MUNICA_YAW": 0.0,
+        "MUNICA_PITCH": 20.0,
+        "MUNICA_ROLL": 15.0,
+        "MUNICA_YAW": 10.0,
         "PULGAR_DISTAL": 35.0,
         "PULGAR_MEDIAL": 40.0,
         "PULGAR_PROXIMAL": 45.0
