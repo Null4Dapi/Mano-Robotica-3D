@@ -5,7 +5,6 @@
     let scene, camera, renderer;
     let handRoot, wristGimbal, palmGroup, rightPalmArchGroup;
     const fingerRigNodes = {};
-    const materials = {};
 
     const camOrbit = {
       isDragging: false,
@@ -75,6 +74,14 @@
       setupViewportInteractions(canvas);
 
       window.addEventListener('resize', onWindowResize);
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('canvas-container');
+      if (!container || !renderer || !camera) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
     }
 
 
