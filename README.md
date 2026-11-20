@@ -41,7 +41,7 @@ make test
 
 ### 3. Compilar una rutina cinemática (.rob)
 ```bash
-./bin/cyberhand_compiler --compilar rutina_valida.rob -o web/trayectoria.json
+./bin/cyberhand_compiler --compilar examples/rutina_valida.rob -o web/trayectoria.json
 ```
 
 Opciones de diagnóstico académico disponibles:

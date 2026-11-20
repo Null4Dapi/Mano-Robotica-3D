@@ -26,7 +26,7 @@ CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(ALL_SRCS))
 
 ALL_OBJS := $(CPP_OBJS) $(GRAMMAR_GEN_OBJS)
 
-.PHONY: all clean dirs grammar test
+.PHONY: all clean dirs grammar test serve run
 
 all: dirs grammar $(TARGET)
 
@@ -72,3 +72,13 @@ test: all
 
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
+
+serve:
+	@echo "Iniciando visor 3D en http://localhost:8000 ..."
+	python3 -m http.server 8000 --directory web
+
+run: all
+	@echo "Compilando rutina cinemática de 18 GDL..."
+	./bin/cyberhand_compiler --compilar examples/rutina_valida.rob -o web/trayectoria.json
+	@echo "Iniciando visor 3D en http://localhost:8000 ..."
+	python3 -m http.server 8000 --directory web
