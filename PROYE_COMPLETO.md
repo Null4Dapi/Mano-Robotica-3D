@@ -354,7 +354,7 @@ Donde $Q$ es el conjunto finito de estados, $\Sigma$ el alfabeto de entrada, $\d
 
 
 
-![Figura 2.1: Pipeline Canónico de Compilación y Ejecución Cinemática en C++](figuras/fig_pipeline.png)
+![Figura 2.1: Pipeline Canónico de Compilación y Ejecución Cinemática en C++](docs/figuras/fig_pipeline.png)
 
 
 
@@ -576,7 +576,7 @@ graph TD
 
 
 
-![Figura 3.1: Diagrama de Clases UML de la Arquitectura del Compilador](figuras/fig_diagrama_clases.png)
+![Figura 3.1: Diagrama de Clases UML de la Arquitectura del Compilador](docs/figuras/fig_diagrama_clases.png)
 
 
 
@@ -842,7 +842,7 @@ classDiagram
 
 
 
-![Figura 3.2: Modelo Entidad-Relación y Persistencia de Telemetría](figuras/fig_diagrama_bd.png)
+![Figura 3.2: Modelo Entidad-Relación y Persistencia de Telemetría](docs/figuras/fig_diagrama_bd.png)
 
 
 
@@ -1010,7 +1010,7 @@ A continuación se presentan los extractos de código fuente C++20 que conforman
 
 
 
-![Figura 3.3: Implementación del Analizador Léxico y Tokenizador en C++20 (Lexer.hpp)](figuras/fig_3_1_lexer.png)
+![Figura 3.3: Implementación del Analizador Léxico y Tokenizador en C++20 (Lexer.hpp)](docs/figuras/fig_3_1_lexer.png)
 
 
 
@@ -1198,7 +1198,7 @@ private:
 
 
 
-![Figura 3.4: Estructura del AST y Parser Descendente en C++20 (Parser.hpp)](figuras/fig_3_2_parser.png)
+![Figura 3.4: Estructura del AST y Parser Descendente en C++20 (Parser.hpp)](docs/figuras/fig_3_2_parser.png)
 
 
 
@@ -1358,7 +1358,7 @@ private:
 
 
 
-![Figura 3.5: Validación Semántica del Rango Biomecánico Seguro 0° a 90° (SemanticAnalyzer.hpp)](figuras/fig_3_3_semantic.png)
+![Figura 3.5: Validación Semántica del Rango Biomecánico Seguro 0° a 90° (SemanticAnalyzer.hpp)](docs/figuras/fig_3_3_semantic.png)
 
 
 
@@ -1460,7 +1460,7 @@ public:
 
 
 
-![Figura 3.6: Generador de Cuádruplas de Código Intermedio (Quadruple.hpp)](figuras/fig_3_4_quadruple.png)
+![Figura 3.6: Generador de Cuádruplas de Código Intermedio (Quadruple.hpp)](docs/figuras/fig_3_4_quadruple.png)
 
 
 
@@ -1560,7 +1560,7 @@ public:
 
 
 
-![Figura 3.7: Máquina Virtual Cinemática para el Control Articular (VirtualMachine.hpp)](figuras/fig_3_5_vm.png)
+![Figura 3.7: Máquina Virtual Cinemática para el Control Articular (VirtualMachine.hpp)](docs/figuras/fig_3_5_vm.png)
 
 
 
@@ -1652,7 +1652,7 @@ public:
 
 #### 3.7.1. Entorno de Simulación Tridimensional y Teleoperación en Tiempo Real
 
-![Figura 3.8: Entorno de simulación tridimensional y teleoperación por cámara web en tiempo real con compilador cinemático en C++20 (18 GDL)](figuras/fig_simulador_3d_resultado.png)
+![Figura 3.8: Entorno de simulación tridimensional y teleoperación por cámara web en tiempo real con compilador cinemático en C++20 (18 GDL)](docs/figuras/fig_simulador_3d_resultado.png)
 
 *Figura 3.8: Entorno de simulación tridimensional y teleoperación por cámara web en tiempo real con compilador cinemático en C++20 (18 GDL).*
 
@@ -1791,7 +1791,7 @@ FIN
 
 ### Anexo A: Gramática EBNF del Lenguaje Cinemático
 
-![Figura A.1: Especificación formal de la Gramática EBNF del lenguaje cinemático RoboHandScript](figuras/fig_anexo_ebnf.png)
+![Figura A.1: Especificación formal de la Gramática EBNF del lenguaje cinemático RoboHandScript](docs/figuras/fig_anexo_ebnf.png)
 
 *Figura A.1: Especificación formal de la Gramática EBNF del lenguaje cinemático RoboHandScript.*
 
