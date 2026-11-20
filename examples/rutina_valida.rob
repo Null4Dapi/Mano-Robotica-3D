@@ -1,86 +1,241 @@
 inicio
     // =========================================================================
-    // SECUENCIA CINEMÁTICA BIOMECÁNICA COORDINADA (18 GDL)
+    // CYBERHAND 3D — RUTINA CINEMÁTICA INTEGRAL DE 18 GDL
+    // Secuencia didáctica y biomecánica completa para sustentación de los 18 GDL:
+    //   - 15 GDL en dedos (5 dedos × 3 falanges: Proximal, Medial, Distal)
+    //   - 3 GDL en muñeca (Eje X: Roll, Eje Y: Pitch, Eje Z: Yaw)
     // =========================================================================
 
-    // FASE 1: CIERRE COORDINADO EN PUÑO / AGARRE CILÍNDRICO
-    // 1.1 Flexión de falanges proximales (MCP) de los cuatro dedos
-    rotar indice falange_1 45 grados;
-    rotar medio falange_1 45 grados;
-    rotar anular falange_1 45 grados;
-    rotar menique falange_1 45 grados;
+    // -------------------------------------------------------------------------
+    // ETAPA 1: CALIBRACIÓN AISLADA DE LOS 5 DEDOS (15 GDL)
+    // -------------------------------------------------------------------------
 
-    // 1.2 Flexión de falanges mediales (PIP)
-    rotar indice falange_2 60 grados;
-    rotar medio falange_2 60 grados;
-    rotar anular falange_2 60 grados;
-    rotar menique falange_2 60 grados;
-
-    // 1.3 Cierre de puntas distales (DIP)
-    rotar indice falange_3 35 grados;
-    rotar medio falange_3 35 grados;
-    rotar anular falange_3 35 grados;
-    rotar menique falange_3 35 grados;
-
-    // 1.4 Oposición y envoltura del pulgar sobre el puño
-    rotar pulgar falange_1 45 grados;
-    rotar pulgar falange_2 40 grados;
-    rotar pulgar falange_3 35 grados;
-
-    // 1.5 Orientación espacial de la muñeca (3 GDL carpo)
-    rotar muneca eje_x 15 grados;
-    rotar muneca eje_y 20 grados;
-    rotar muneca eje_z 10 grados;
-
-    // Pausa cinemática con agarre cerrado
-    esperar 300 ms;
-
-    // FASE 2: EXTENSIÓN Y APERTURA COMPLETA
-    // Retorno neutral de muñeca
-    rotar muneca eje_x 0 grados;
-    rotar muneca eje_y 0 grados;
-    rotar muneca eje_z 0 grados;
-
-    // Liberar pulgar
+    // 1.1 Dedo Pulgar (MCP, PIP, DIP)
+    rotar pulgar falange_1 35 grados;
+    esperar 180 ms;
+    rotar pulgar falange_2 45 grados;
+    esperar 180 ms;
+    rotar pulgar falange_3 40 grados;
+    esperar 250 ms;
+    // Retorno pulgar
     rotar pulgar falange_1 0 grados;
     rotar pulgar falange_2 0 grados;
     rotar pulgar falange_3 0 grados;
+    esperar 200 ms;
 
-    // Apertura armónica de los cuatro dedos
+    // 1.2 Dedo Índice (MCP, PIP, DIP)
+    rotar indice falange_1 45 grados;
+    esperar 180 ms;
+    rotar indice falange_2 60 grados;
+    esperar 180 ms;
+    rotar indice falange_3 35 grados;
+    esperar 250 ms;
+    // Retorno índice
     rotar indice falange_1 0 grados;
-    rotar medio falange_1 0 grados;
-    rotar anular falange_1 0 grados;
-    rotar menique falange_1 0 grados;
-
     rotar indice falange_2 0 grados;
-    rotar medio falange_2 0 grados;
-    rotar anular falange_2 0 grados;
-    rotar menique falange_2 0 grados;
-
     rotar indice falange_3 0 grados;
-    rotar medio falange_3 0 grados;
-    rotar anular falange_3 0 grados;
-    rotar menique falange_3 0 grados;
+    esperar 200 ms;
 
+    // 1.3 Dedo Medio (MCP, PIP, DIP)
+    rotar medio falange_1 45 grados;
+    esperar 180 ms;
+    rotar medio falange_2 60 grados;
+    esperar 180 ms;
+    rotar medio falange_3 35 grados;
+    esperar 250 ms;
+    // Retorno medio
+    rotar medio falange_1 0 grados;
+    rotar medio falange_2 0 grados;
+    rotar medio falange_3 0 grados;
+    esperar 200 ms;
+
+    // 1.4 Dedo Anular (MCP, PIP, DIP)
+    rotar anular falange_1 45 grados;
+    esperar 180 ms;
+    rotar anular falange_2 60 grados;
+    esperar 180 ms;
+    rotar anular falange_3 35 grados;
+    esperar 250 ms;
+    // Retorno anular
+    rotar anular falange_1 0 grados;
+    rotar anular falange_2 0 grados;
+    rotar anular falange_3 0 grados;
+    esperar 200 ms;
+
+    // 1.5 Dedo Meñique (MCP, PIP, DIP)
+    rotar menique falange_1 50 grados;
+    esperar 180 ms;
+    rotar menique falange_2 60 grados;
+    esperar 180 ms;
+    rotar menique falange_3 35 grados;
+    esperar 250 ms;
+    // Retorno meñique
+    rotar menique falange_1 0 grados;
+    rotar menique falange_2 0 grados;
+    rotar menique falange_3 0 grados;
+    esperar 200 ms;
+
+    // -------------------------------------------------------------------------
+    // ETAPA 2: CALIBRACIÓN TRIDIMENSIONAL DE LA MUÑECA (3 GDL)
+    // -------------------------------------------------------------------------
+    // 2.1 Eje X (Roll / Pronación-Supinación lateral)
+    rotar muneca eje_x 25 grados;
+    esperar 250 ms;
+    rotar muneca eje_x 0 grados;
+    esperar 200 ms;
+
+    // 2.2 Eje Y (Pitch / Flexión palmar vertical)
+    rotar muneca eje_y 30 grados;
+    esperar 250 ms;
+    rotar muneca eje_y 0 grados;
+    esperar 200 ms;
+
+    // 2.3 Eje Z (Yaw / Desviación radial y cubital)
+    rotar muneca eje_z 20 grados;
+    esperar 250 ms;
+    rotar muneca eje_z 0 grados;
+    esperar 200 ms;
+
+    // -------------------------------------------------------------------------
+    // ETAPA 3: OLA BIOMECÁNICA COORDINADA (FINGER WAVE EN CASCADA)
+    // -------------------------------------------------------------------------
+    // Cierre progresivo desde el meñique hasta el pulgar
+    rotar menique falange_1 55 grados;
+    rotar menique falange_2 65 grados;
+    rotar menique falange_3 40 grados;
+    esperar 120 ms;
+
+    rotar anular falange_1 55 grados;
+    rotar anular falange_2 65 grados;
+    rotar anular falange_3 40 grados;
+    esperar 120 ms;
+
+    rotar medio falange_1 55 grados;
+    rotar medio falange_2 65 grados;
+    rotar medio falange_3 40 grados;
+    esperar 120 ms;
+
+    rotar indice falange_1 50 grados;
+    rotar indice falange_2 60 grados;
+    rotar indice falange_3 35 grados;
+    esperar 120 ms;
+
+    rotar pulgar falange_1 40 grados;
+    rotar pulgar falange_2 45 grados;
+    rotar pulgar falange_3 35 grados;
+    esperar 300 ms;
+
+    // Apertura coordinada en reverso
+    rotar pulgar falange_1 0 grados;
+    rotar pulgar falange_2 0 grados;
+    rotar pulgar falange_3 0 grados;
+    esperar 120 ms;
+
+    rotar indice falange_1 0 grados;
+    rotar indice falange_2 0 grados;
+    rotar indice falange_3 0 grados;
+    esperar 120 ms;
+
+    rotar medio falange_1 0 grados;
+    rotar medio falange_2 0 grados;
+    rotar medio falange_3 0 grados;
+    esperar 120 ms;
+
+    rotar anular falange_1 0 grados;
+    rotar anular falange_2 0 grados;
+    rotar anular falange_3 0 grados;
+    esperar 120 ms;
+
+    rotar menique falange_1 0 grados;
+    rotar menique falange_2 0 grados;
+    rotar menique falange_3 0 grados;
     esperar 250 ms;
 
-    // FASE 3: PINZA DE PRECISIÓN (OPOSICIÓN PULGAR - ÍNDICE)
-    rotar indice falange_1 45 grados;
-    rotar indice falange_2 50 grados;
-    rotar indice falange_3 30 grados;
+    // -------------------------------------------------------------------------
+    // ETAPA 4: POSTURAS FUNCIONALES COMBINADAS
+    // -------------------------------------------------------------------------
 
-    rotar pulgar falange_1 48 grados;
-    rotar pulgar falange_2 42 grados;
-    rotar pulgar falange_3 35 grados;
+    // 4.1 Agarre de Fuerza Cilíndrico (Puño total cerrado con muñeca a 15°)
+    rotar muneca eje_x 15 grados;
+    rotar indice falange_1 60 grados;
+    rotar indice falange_2 70 grados;
+    rotar indice falange_3 45 grados;
+    rotar medio falange_1 60 grados;
+    rotar medio falange_2 70 grados;
+    rotar medio falange_3 45 grados;
+    rotar anular falange_1 60 grados;
+    rotar anular falange_2 70 grados;
+    rotar anular falange_3 45 grados;
+    rotar menique falange_1 60 grados;
+    rotar menique falange_2 70 grados;
+    rotar menique falange_3 45 grados;
+    rotar pulgar falange_1 45 grados;
+    rotar pulgar falange_2 45 grados;
+    rotar pulgar falange_3 40 grados;
+    esperar 350 ms;
 
-    esperar 300 ms;
-
-    // FASE 4: RETORNO SUAVE A REPOSO NEUTRAL
+    // 4.2 Retorno neutral
+    rotar muneca eje_x 0 grados;
     rotar indice falange_1 0 grados;
     rotar indice falange_2 0 grados;
     rotar indice falange_3 0 grados;
-
+    rotar medio falange_1 0 grados;
+    rotar medio falange_2 0 grados;
+    rotar medio falange_3 0 grados;
+    rotar anular falange_1 0 grados;
+    rotar anular falange_2 0 grados;
+    rotar anular falange_3 0 grados;
+    rotar menique falange_1 0 grados;
+    rotar menique falange_2 0 grados;
+    rotar menique falange_3 0 grados;
     rotar pulgar falange_1 0 grados;
     rotar pulgar falange_2 0 grados;
     rotar pulgar falange_3 0 grados;
+    esperar 250 ms;
+
+    // 4.3 Pinza Fina de Precisión (Oposición Índice y Pulgar)
+    rotar indice falange_1 45 grados;
+    rotar indice falange_2 55 grados;
+    rotar indice falange_3 35 grados;
+    rotar pulgar falange_1 50 grados;
+    rotar pulgar falange_2 45 grados;
+    rotar pulgar falange_3 35 grados;
+    rotar muneca eje_y 15 grados;
+    esperar 350 ms;
+
+    // Retorno de pinza
+    rotar indice falange_1 0 grados;
+    rotar indice falange_2 0 grados;
+    rotar indice falange_3 0 grados;
+    rotar pulgar falange_1 0 grados;
+    rotar pulgar falange_2 0 grados;
+    rotar pulgar falange_3 0 grados;
+    rotar muneca eje_y 0 grados;
+    esperar 250 ms;
+
+    // 4.4 Gesto de Victoria / Paz (Índice y Medio en V con muñeca erguida)
+    rotar anular falange_1 75 grados;
+    rotar anular falange_2 80 grados;
+    rotar anular falange_3 60 grados;
+    rotar menique falange_1 75 grados;
+    rotar menique falange_2 80 grados;
+    rotar menique falange_3 60 grados;
+    rotar pulgar falange_1 55 grados;
+    rotar pulgar falange_2 50 grados;
+    rotar pulgar falange_3 40 grados;
+    rotar muneca eje_y 10 grados;
+    esperar 350 ms;
+
+    // 4.5 Retorno final a reposo neutral completo
+    rotar anular falange_1 0 grados;
+    rotar anular falange_2 0 grados;
+    rotar anular falange_3 0 grados;
+    rotar menique falange_1 0 grados;
+    rotar menique falange_2 0 grados;
+    rotar menique falange_3 0 grados;
+    rotar pulgar falange_1 0 grados;
+    rotar pulgar falange_2 0 grados;
+    rotar pulgar falange_3 0 grados;
+    rotar muneca eje_y 0 grados;
+    esperar 200 ms;
 fin

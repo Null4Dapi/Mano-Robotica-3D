@@ -96,9 +96,9 @@ fi
 # ------------------------------------------------------------------------------
 echo -n "e) Test --cuadruplas examples/rutina_valida.rob ... "
 OUT_QUAD=$($BIN --cuadruplas examples/rutina_valida.rob)
-if echo "$OUT_QUAD" | grep -q "TABLA DE CUÁDRUPLAS" && \
-   echo "$OUT_QUAD" | grep -q "TABLA DE TRIPLAS" && \
-   echo "$OUT_QUAD" | grep -q "ROTAR"; then
+if grep -q "TABLA DE CUÁDRUPLAS" <<< "$OUT_QUAD" && \
+   grep -q "TABLA DE TRIPLAS" <<< "$OUT_QUAD" && \
+   grep -q "ROTAR" <<< "$OUT_QUAD"; then
     echo -e "${GREEN}PASSED${NC}"
     PASSED_TESTS=$((PASSED_TESTS + 1))
 else
@@ -112,8 +112,8 @@ fi
 # ------------------------------------------------------------------------------
 echo -n "f) Test --optimizar examples/rutina_valida.rob ... "
 OUT_OPT=$($BIN --optimizar examples/rutina_valida.rob)
-if echo "$OUT_OPT" | grep -qi "REPORTE DE OPTIMIZA" && \
-   echo "$OUT_OPT" | grep -q "Reduccion:"; then
+if grep -qi "REPORTE DE OPTIMIZA" <<< "$OUT_OPT" && \
+   grep -q "Reduccion:" <<< "$OUT_OPT"; then
     echo -e "${GREEN}PASSED${NC}"
     PASSED_TESTS=$((PASSED_TESTS + 1))
 else
