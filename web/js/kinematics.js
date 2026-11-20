@@ -14,36 +14,43 @@ function applyTrajectoryJoints(joints) {
   if (!joints) return;
 
   // 1. Wrist Orientation (3 GDL)
-  if (joints.MUNICA_PITCH !== undefined) handState.wrist.target.pitch = THREE.MathUtils.degToRad(joints.MUNICA_PITCH);
-  if (joints.MUNICA_ROLL !== undefined)  handState.wrist.target.roll  = THREE.MathUtils.degToRad(joints.MUNICA_ROLL);
-  if (joints.MUNICA_YAW !== undefined)   handState.wrist.target.yaw   = THREE.MathUtils.degToRad(joints.MUNICA_YAW);
+  const pitch = joints.MUNICA_PITCH ?? joints.MUNECA_PITCH ?? joints.MUÑECA_PITCH ?? joints.WRIST_PITCH;
+  if (pitch !== undefined) handState.wrist.target.pitch = THREE.MathUtils.degToRad(parseFloat(pitch));
+
+  const roll = joints.MUNICA_ROLL ?? joints.MUNECA_ROLL ?? joints.MUÑECA_ROLL ?? joints.WRIST_ROLL;
+  if (roll !== undefined) handState.wrist.target.roll = THREE.MathUtils.degToRad(parseFloat(roll));
+
+  const yaw = joints.MUNICA_YAW ?? joints.MUNECA_YAW ?? joints.MUÑECA_YAW ?? joints.WRIST_YAW;
+  if (yaw !== undefined) handState.wrist.target.yaw = THREE.MathUtils.degToRad(parseFloat(yaw));
 
   // 2. Finger Phalanxes (15 GDL: 5 fingers × 3 joints)
   const fMap = {
     'PULGAR': 'thumb',
     'INDICE': 'index',
+    'ÍNDICE': 'index',
     'MEDIO': 'middle',
     'ANULAR': 'ring',
-    'MENIQUE': 'pinky'
+    'MENIQUE': 'pinky',
+    'MEÑIQUE': 'pinky'
   };
 
   for (const [prefix, id] of Object.entries(fMap)) {
     const target = handState.fingers[id]?.target;
     if (!target) continue;
     if (joints[`${prefix}_PROXIMAL`] !== undefined) {
-      target.mcp = THREE.MathUtils.degToRad(joints[`${prefix}_PROXIMAL`]);
+      target.mcp = THREE.MathUtils.degToRad(parseFloat(joints[`${prefix}_PROXIMAL`]));
     }
     if (joints[`${prefix}_MEDIAL`] !== undefined) {
-      target.pip = THREE.MathUtils.degToRad(joints[`${prefix}_MEDIAL`]);
+      target.pip = THREE.MathUtils.degToRad(parseFloat(joints[`${prefix}_MEDIAL`]));
     }
     if (joints[`${prefix}_DISTAL`] !== undefined) {
-      target.dip = THREE.MathUtils.degToRad(joints[`${prefix}_DISTAL`]);
+      target.dip = THREE.MathUtils.degToRad(parseFloat(joints[`${prefix}_DISTAL`]));
     }
   }
 
   // Dynamic Abduction/Splay Coupling during Trajectory Playback
-  const idxProx = joints.INDICE_PROXIMAL || 0;
-  const pinkProx = joints.MENIQUE_PROXIMAL || 0;
+  const idxProx = parseFloat(joints.INDICE_PROXIMAL ?? joints.ÍNDICE_PROXIMAL ?? 0);
+  const pinkProx = parseFloat(joints.MENIQUE_PROXIMAL ?? joints.MEÑIQUE_PROXIMAL ?? 0);
   const isFist = (idxProx > 30 && pinkProx > 30);
   const isPinch = (idxProx > 30 && pinkProx < 15);
 
@@ -98,6 +105,10 @@ function applyTrajectoryFrame(idx) {
   applyTrajectoryJoints(f.articulaciones);
   trajectoryPlayback.frameIdx = idx;
 
+  if (typeof syncAllSlidersToTargets === 'function') {
+    syncAllSlidersToTargets();
+  }
+
   const range = document.getElementById('timeline-range');
   if (range) range.value = idx;
 
@@ -130,7 +141,7 @@ function stepTrajectory() {
     trajectoryPlayback.timer = setTimeout(stepTrajectory, delay);
   } else {
     updateStatusMessage(`Trayectoria completada (${frames.length} frames).`);
-    pauseTrajectory();
+    pauseTrajectory(true);
   }
 }
 
@@ -146,11 +157,13 @@ function toggleTrajectoryPlayback() {
   }
 }
 
-function pauseTrajectory() {
+function pauseTrajectory(keepStatus = false) {
   trajectoryPlayback.isPlaying = false;
   if (trajectoryPlayback.timer) clearTimeout(trajectoryPlayback.timer);
   updatePlayIcon(false);
-  updateStatusMessage('Reproducción de trayectoria pausada.');
+  if (!keepStatus) {
+    updateStatusMessage('Reproducción de trayectoria pausada.');
+  }
 }
 
 function resumeTrajectory() {
@@ -182,23 +195,26 @@ function updatePlayIcon(isPlaying) {
 }
 
 function onTimelineScrub(val) {
+  if (trajectoryPlayback.isPlaying) pauseTrajectory();
   const idx = parseInt(val, 10);
   applyTrajectoryFrame(idx);
 }
 
 function stepTimelineFrame(delta) {
   if (!loadedTrajectory || !loadedTrajectory.frames) return;
+  if (trajectoryPlayback.isPlaying) pauseTrajectory();
   const newIdx = THREE.MathUtils.clamp(trajectoryPlayback.frameIdx + delta, 0, loadedTrajectory.frames.length - 1);
   applyTrajectoryFrame(newIdx);
 }
 
 function cycleTrajectorySpeed(btn) {
+  const btnEl = btn || document.getElementById('btn-speed-badge');
   const speeds = [0.5, 1.0, 2.0];
   let curIdx = speeds.indexOf(trajectoryPlayback.speed);
   if (curIdx === -1) curIdx = 1;
   const nextIdx = (curIdx + 1) % speeds.length;
   trajectoryPlayback.speed = speeds[nextIdx];
-  if (btn) btn.textContent = `${trajectoryPlayback.speed.toFixed(1)}x`;
+  if (btnEl) btnEl.textContent = `${trajectoryPlayback.speed.toFixed(1)}x`;
 }
 
 async function fetchTrajectoryJson(autoPlay = false) {

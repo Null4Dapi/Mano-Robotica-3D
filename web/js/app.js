@@ -14,7 +14,7 @@ window.addEventListener('DOMContentLoaded', () => {
   buildServoSlidersUI();
   initThreeScene();
   initTrackerUI();
-  applyPreset('open');
+  applyPreset('reposo');
   fetchTrajectoryJson(false);
   animate(performance.now());
 });

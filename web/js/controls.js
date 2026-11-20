@@ -114,16 +114,32 @@ function buildServoSlidersUI() {
   const srvSmooth = document.getElementById('slider-smoothing');
 
   if (srvPitch) srvPitch.addEventListener('input', (e) => {
-    handState.wrist.target.pitch = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+    const val = parseFloat(e.target.value);
+    handState.wrist.target.pitch = THREE.MathUtils.degToRad(val);
+    const lbl = document.getElementById('lbl-wrist-pitch');
+    if (lbl) lbl.textContent = `${Math.round(val)}°`;
+    markManualTuning();
   });
   if (srvRoll) srvRoll.addEventListener('input', (e) => {
-    handState.wrist.target.roll = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+    const val = parseFloat(e.target.value);
+    handState.wrist.target.roll = THREE.MathUtils.degToRad(val);
+    const lbl = document.getElementById('lbl-wrist-roll');
+    if (lbl) lbl.textContent = `${Math.round(val)}°`;
+    markManualTuning();
   });
   if (srvYaw) srvYaw.addEventListener('input', (e) => {
-    handState.wrist.target.yaw = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+    const val = parseFloat(e.target.value);
+    handState.wrist.target.yaw = THREE.MathUtils.degToRad(val);
+    const lbl = document.getElementById('lbl-wrist-yaw');
+    if (lbl) lbl.textContent = `${Math.round(val)}°`;
+    markManualTuning();
   });
   if (srvArch) srvArch.addEventListener('input', (e) => {
-    handState.wrist.target.palmArch = THREE.MathUtils.degToRad(parseFloat(e.target.value));
+    const val = parseFloat(e.target.value);
+    handState.wrist.target.palmArch = THREE.MathUtils.degToRad(val);
+    const lbl = document.getElementById('lbl-palm-arch');
+    if (lbl) lbl.textContent = `${Math.round(val)}°`;
+    markManualTuning();
   });
   if (srvSmooth) srvSmooth.addEventListener('input', (e) => {
     handState.smoothing = parseFloat(e.target.value);
@@ -132,18 +148,117 @@ function buildServoSlidersUI() {
   });
 }
 
+function markManualTuning() {
+  document.querySelectorAll('.pose-chip').forEach(b => b.classList.remove('active'));
+  const gBadge = document.getElementById('gesture-badge');
+  if (gBadge && !handState.cameraActive && !trajectoryPlayback?.isPlaying) {
+    gBadge.textContent = 'MANUAL / 18 GDL';
+  }
+}
+
+function syncAllSlidersToTargets() {
+  // 1. Sync Wrist (3 GDL + Arch)
+  const wTar = handState.wrist.target;
+  const pDeg = Math.round(THREE.MathUtils.radToDeg(wTar.pitch));
+  const rDeg = Math.round(THREE.MathUtils.radToDeg(wTar.roll));
+  const yDeg = Math.round(THREE.MathUtils.radToDeg(wTar.yaw));
+  const aDeg = Math.round(THREE.MathUtils.radToDeg(wTar.palmArch));
+
+  const srvP = document.getElementById('srv-wrist-pitch');
+  const srvR = document.getElementById('srv-wrist-roll');
+  const srvY = document.getElementById('srv-wrist-yaw');
+  const srvA = document.getElementById('srv-palm-arch');
+  if (srvP) srvP.value = pDeg;
+  if (srvR) srvR.value = rDeg;
+  if (srvY) srvY.value = yDeg;
+  if (srvA) srvA.value = aDeg;
+
+  const lblP = document.getElementById('lbl-wrist-pitch');
+  const lblR = document.getElementById('lbl-wrist-roll');
+  const lblY = document.getElementById('lbl-wrist-yaw');
+  const lblA = document.getElementById('lbl-palm-arch');
+  if (lblP) lblP.textContent = `${pDeg}°`;
+  if (lblR) lblR.textContent = `${rDeg}°`;
+  if (lblY) lblY.textContent = `${yDeg}°`;
+  if (lblA) lblA.textContent = `${aDeg}°`;
+
+  // 2. Sync Fingers (15 GDL + curl + splay)
+  FINGER_CONFIGS.forEach(cfg => {
+    const fTar = handState.fingers[cfg.id]?.target;
+    if (!fTar) return;
+
+    const mcpDeg = Math.round(THREE.MathUtils.radToDeg(fTar.mcp));
+    const pipDeg = Math.round(THREE.MathUtils.radToDeg(fTar.pip));
+    const dipDeg = Math.round(THREE.MathUtils.radToDeg(fTar.dip));
+    let splayDeg = Math.round(THREE.MathUtils.radToDeg(fTar.splay));
+    if (cfg.id === 'ring' || cfg.id === 'pinky') {
+      splayDeg = -splayDeg;
+    }
+
+    const maxMcp = cfg.id === 'thumb' ? 1.05 : 1.52;
+    const curlPct = Math.min(100, Math.max(0, Math.round((fTar.mcp / maxMcp) * 100)));
+
+    const srvMcp   = document.getElementById(`srv-${cfg.id}-mcp`);
+    const srvPip   = document.getElementById(`srv-${cfg.id}-pip`);
+    const srvDip   = document.getElementById(`srv-${cfg.id}-dip`);
+    const srvSplay = document.getElementById(`srv-${cfg.id}-splay`);
+    const srvCurl  = document.getElementById(`srv-${cfg.id}-curl`);
+
+    if (srvMcp)   srvMcp.value   = mcpDeg;
+    if (srvPip)   srvPip.value   = pipDeg;
+    if (srvDip)   srvDip.value   = dipDeg;
+    if (srvSplay) srvSplay.value = splayDeg;
+    if (srvCurl)  srvCurl.value  = curlPct;
+
+    const lblMcp   = document.getElementById(`lbl-${cfg.id}-mcp`);
+    const lblPip   = document.getElementById(`lbl-${cfg.id}-pip`);
+    const lblDip   = document.getElementById(`lbl-${cfg.id}-dip`);
+    const lblSplay = document.getElementById(`lbl-${cfg.id}-splay`);
+    const lblCurl  = document.getElementById(`lbl-${cfg.id}-curl`);
+    const lblTag   = document.getElementById(`lbl-${cfg.id}-tag`);
+
+    if (lblMcp)   lblMcp.textContent   = `${mcpDeg}°`;
+    if (lblPip)   lblPip.textContent   = `${pipDeg}°`;
+    if (lblDip)   lblDip.textContent   = `${dipDeg}°`;
+    if (lblSplay) lblSplay.textContent = `${splayDeg}°`;
+    if (lblCurl)  lblCurl.textContent  = `${curlPct}%`;
+    if (lblTag)   lblTag.textContent   = `MCP: ${mcpDeg}° • PIP: ${pipDeg}° • DIP: ${dipDeg}°`;
+  });
+}
+
 function onFingerMasterCurl(fingerId, percentVal) {
   const norm = parseFloat(percentVal) / 100;
   const fTarget = handState.fingers[fingerId].target;
-  if (fingerId === 'thumb') {
-    fTarget.mcp = norm * 1.05;
-    fTarget.pip = norm * 1.15;
-    fTarget.dip = norm * 0.95;
-  } else {
-    fTarget.mcp = norm * 1.52;
-    fTarget.pip = norm * 1.65;
-    fTarget.dip = norm * 1.25;
-  }
+  const maxMcp = fingerId === 'thumb' ? 1.05 : 1.52;
+  const maxPip = fingerId === 'thumb' ? 1.15 : 1.65;
+  const maxDip = fingerId === 'thumb' ? 0.95 : 1.25;
+
+  fTarget.mcp = norm * maxMcp;
+  fTarget.pip = norm * maxPip;
+  fTarget.dip = norm * maxDip;
+
+  const lblCurl = document.getElementById(`lbl-${fingerId}-curl`);
+  if (lblCurl) lblCurl.textContent = `${Math.round(percentVal)}%`;
+
+  const mcpDeg = Math.round(THREE.MathUtils.radToDeg(fTarget.mcp));
+  const pipDeg = Math.round(THREE.MathUtils.radToDeg(fTarget.pip));
+  const dipDeg = Math.round(THREE.MathUtils.radToDeg(fTarget.dip));
+
+  const srvMcp = document.getElementById(`srv-${fingerId}-mcp`);
+  const srvPip = document.getElementById(`srv-${fingerId}-pip`);
+  const srvDip = document.getElementById(`srv-${fingerId}-dip`);
+  if (srvMcp) srvMcp.value = mcpDeg;
+  if (srvPip) srvPip.value = pipDeg;
+  if (srvDip) srvDip.value = dipDeg;
+
+  const lblMcp = document.getElementById(`lbl-${fingerId}-mcp`);
+  const lblPip = document.getElementById(`lbl-${fingerId}-pip`);
+  const lblDip = document.getElementById(`lbl-${fingerId}-dip`);
+  if (lblMcp) lblMcp.textContent = `${mcpDeg}°`;
+  if (lblPip) lblPip.textContent = `${pipDeg}°`;
+  if (lblDip) lblDip.textContent = `${dipDeg}°`;
+
+  markManualTuning();
 }
 
 function onJointManualChange(fingerId, jointKey, degVal) {
@@ -158,12 +273,25 @@ function onJointManualChange(fingerId, jointKey, degVal) {
     handState.fingers[fingerId].target.splay = splayAngle;
     const lbl = document.getElementById(`lbl-${fingerId}-splay`);
     if (lbl) lbl.textContent = `${Math.round(val)}°`;
+    markManualTuning();
     return;
   }
 
   handState.fingers[fingerId].target[jointKey] = rad;
   const lbl = document.getElementById(`lbl-${fingerId}-${jointKey}`);
   if (lbl) lbl.textContent = `${Math.round(val)}°`;
+
+  // Update curl slider if MCP changed
+  if (jointKey === 'mcp') {
+    const maxMcp = fingerId === 'thumb' ? 1.05 : 1.52;
+    const curlPct = Math.min(100, Math.max(0, Math.round((rad / maxMcp) * 100)));
+    const srvCurl = document.getElementById(`srv-${fingerId}-curl`);
+    const lblCurl = document.getElementById(`lbl-${fingerId}-curl`);
+    if (srvCurl) srvCurl.value = curlPct;
+    if (lblCurl) lblCurl.textContent = `${curlPct}%`;
+  }
+
+  markManualTuning();
 }
 
 function resetWrist() {
@@ -176,58 +304,105 @@ function resetWrist() {
   if (r) r.value = 0;
   if (y) y.value = 0;
   if (a) a.value = 5;
+
+  const lp = document.getElementById('lbl-wrist-pitch');
+  const lr = document.getElementById('lbl-wrist-roll');
+  const ly = document.getElementById('lbl-wrist-yaw');
+  const la = document.getElementById('lbl-palm-arch');
+  if (lp) lp.textContent = '0°';
+  if (lr) lr.textContent = '0°';
+  if (ly) ly.textContent = '0°';
+  if (la) la.textContent = '5°';
 }
 
 function applyPreset(presetName, btn) {
-  if (btn) {
-    document.querySelectorAll('.pose-chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  if (trajectoryPlayback?.isPlaying && typeof pauseTrajectory === 'function') {
+    pauseTrajectory();
+  }
+  if (handState.cameraActive && typeof stopWebcamTracking === 'function') {
+    stopWebcamTracking();
   }
 
-  const setF = (id, curl, splay = 0) => {
-    const isT = id === 'thumb';
-    handState.fingers[id].target.mcp = curl * (isT ? 1.05 : 1.52);
-    handState.fingers[id].target.pip = curl * (isT ? 1.15 : 1.65);
-    handState.fingers[id].target.dip = curl * (isT ? 0.95 : 1.25);
+  const p = (presetName || '').toLowerCase().trim();
+
+  // Highlight matching chip
+  document.querySelectorAll('.pose-chip').forEach(b => b.classList.remove('active'));
+  const targetChip = btn || document.querySelector(`.pose-chip[data-preset="${p}"]`);
+  if (targetChip) targetChip.classList.add('active');
+
+  const setF = (id, mcpDeg, pipDeg, dipDeg, splay) => {
+    handState.fingers[id].target.mcp = THREE.MathUtils.degToRad(mcpDeg);
+    handState.fingers[id].target.pip = THREE.MathUtils.degToRad(pipDeg);
+    handState.fingers[id].target.dip = THREE.MathUtils.degToRad(dipDeg);
     handState.fingers[id].target.splay = splay;
   };
 
   resetWrist();
-  let badgeText = 'REPOSO / MANUAL';
-  const p = (presetName || '').toLowerCase();
+  let badgeText = 'REPOSO';
 
-  if (p === 'open' || p === 'neutral' || p === 'reposo') {
-    setF('thumb', 0.04, 0.32);
-    setF('index', 0.04, 0.18);
-    setF('middle', 0.04, 0.0);
-    setF('ring', 0.04, -0.14);
-    setF('pinky', 0.04, -0.28);
-    handState.wrist.target.palmArch = 0.04;
-    badgeText = 'REPOSO / ABIERTA';
+  if (p === 'reposo' || p === 'rest') {
+    setF('thumb', 6, 6, 4, 0.32);
+    setF('index', 8, 6, 4, 0.18);
+    setF('middle', 8, 6, 4, 0.0);
+    setF('ring', 8, 6, 4, -0.14);
+    setF('pinky', 10, 8, 6, -0.28);
+    handState.wrist.target.palmArch = 0.08;
+    badgeText = 'REPOSO';
+  } else if (p === 'abierta' || p === 'open' || p === 'neutral') {
+    setF('thumb', 0, 0, 0, 0.38);
+    setF('index', 0, 0, 0, 0.22);
+    setF('middle', 0, 0, 0, 0.0);
+    setF('ring', 0, 0, 0, -0.18);
+    setF('pinky', 0, 0, 0, -0.32);
+    handState.wrist.target.palmArch = 0.02;
+    badgeText = 'MANO ABIERTA';
   } else if (p === 'fist' || p === 'puño' || p === 'puno') {
-    setF('thumb', 0.92, -0.25);
-    setF('index', 0.98, 0);
-    setF('middle', 0.98, 0);
-    setF('ring', 0.98, 0);
-    setF('pinky', 0.98, 0);
-    handState.wrist.target.palmArch = 0.32;
+    setF('thumb', 55, 70, 50, -0.25);
+    setF('index', 85, 88, 75, 0.0);
+    setF('middle', 88, 90, 75, 0.0);
+    setF('ring', 88, 90, 75, 0.0);
+    setF('pinky', 88, 90, 75, 0.0);
+    handState.wrist.target.pitch = THREE.MathUtils.degToRad(10);
+    handState.wrist.target.palmArch = 0.25;
     badgeText = 'PUÑO CERRADO';
-  } else if (p === 'ok' || p === 'pinch' || p === 'pinza') {
-    setF('thumb', 0.72, -0.22);
-    setF('index', 0.74, -0.06);
-    setF('middle', 0.08, 0.05);
-    setF('ring', 0.06, -0.05);
-    setF('pinky', 0.05, -0.12);
-    handState.wrist.target.palmArch = 0.20;
-    badgeText = 'PINZA OK';
+  } else if (p === 'pinza' || p === 'pinch') {
+    setF('thumb', 45, 55, 40, -0.20);
+    setF('index', 50, 65, 45, -0.05);
+    setF('middle', 75, 80, 60, 0.0);
+    setF('ring', 80, 85, 65, -0.04);
+    setF('pinky', 80, 85, 65, -0.08);
+    handState.wrist.target.palmArch = 0.16;
+    badgeText = 'PINZA DE PRECISIÓN';
+  } else if (p === 'paz' || p === 'peace' || p === 'victoria') {
+    setF('thumb', 55, 65, 45, -0.22);
+    setF('index', 0, 0, 0, 0.25);
+    setF('middle', 0, 0, 0, -0.10);
+    setF('ring', 85, 90, 75, 0.0);
+    setF('pinky', 85, 90, 75, 0.0);
+    handState.wrist.target.palmArch = 0.08;
+    badgeText = 'PAZ / VICTORIA';
+  } else if (p === 'ok') {
+    setF('thumb', 48, 58, 42, -0.22);
+    setF('index', 52, 68, 46, -0.06);
+    setF('middle', 4, 4, 4, 0.08);
+    setF('ring', 6, 6, 4, -0.06);
+    setF('pinky', 8, 8, 6, -0.16);
+    handState.wrist.target.pitch = THREE.MathUtils.degToRad(-5);
+    handState.wrist.target.palmArch = 0.14;
+    badgeText = 'SIGNO OK';
   } else if (p === 'point' || p === 'señalar' || p === 'senalar' || p === 'apuntar') {
-    setF('thumb', 0.65, -0.2);
-    setF('index', 0.03, 0);
-    setF('middle', 0.94, 0);
-    setF('ring', 0.95, 0);
-    setF('pinky', 0.95, 0);
+    setF('thumb', 50, 60, 40, -0.20);
+    setF('index', 0, 0, 0, 0.05);
+    setF('middle', 85, 90, 75, 0.0);
+    setF('ring', 85, 90, 75, 0.0);
+    setF('pinky', 85, 90, 75, 0.0);
+    handState.wrist.target.pitch = THREE.MathUtils.degToRad(5);
+    handState.wrist.target.palmArch = 0.10;
     badgeText = 'SEÑALAR';
   }
+
+  // Synchronize all 18 GDL sliders + labels to the target pose
+  syncAllSlidersToTargets();
 
   const gBadge = document.getElementById('gesture-badge');
   if (gBadge) gBadge.textContent = badgeText;

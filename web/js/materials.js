@@ -65,7 +65,8 @@ function createRobotMaterials() {
 
 function setShadingMode(mode, btn) {
   document.querySelectorAll('.viewport-top-right .view-control-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
+  const activeBtn = btn || (mode === 'wire' ? document.getElementById('btn-wire') : document.getElementById('btn-solid'));
+  if (activeBtn) activeBtn.classList.add('active');
   handState.wireframe = (mode === 'wire');
   Object.values(materials).forEach(mat => {
     if (mat && 'wireframe' in mat) mat.wireframe = handState.wireframe;

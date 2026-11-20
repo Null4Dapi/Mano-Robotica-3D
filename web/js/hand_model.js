@@ -625,7 +625,8 @@
 
     function setCameraSnapView(view, btn) {
       document.querySelectorAll('.viewport-top-left .view-control-btn').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+      const activeBtn = btn || document.querySelector(`.viewport-top-left .view-control-btn[onclick*="'${view}'"]`);
+      if (activeBtn) activeBtn.classList.add('active');
 
       if (view === 'iso') {
         camOrbit.theta = 0.35;
