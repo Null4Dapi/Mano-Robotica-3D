@@ -1,32 +1,96 @@
-# Compilados y binarios C++
-*.exe
-*.o
-*.obj
-*.out
-*.app
+# ==============================================================================
+# CyberHand 3D — .gitignore
+# Reglas de exclusión para compilación C++20, simulación Web, IDEs y SO
+# ==============================================================================
+
+# Binarios y artefactos de compilación C++
 bin/
 build/
 dist/
+out/
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.a
+*.so
+*.dylib
+*.dll
 
-# Archivos de depuración y dumps
-*.dSYM/
+# Flex & Bison (archivos generados intermediarios fuera de build/)
+lex.yy.c
+lex.yy.cpp
+*.tab.c
+*.tab.cpp
+*.tab.h
+*.tab.hpp
+location.hh
+position.hh
+stack.hh
+
+# IDEs específicos de C++ (Dev-C++, Code::Blocks, Visual Studio)
+*.layout
+*.win
+Makefile.win
+*.depend
+*.cbp
+*.vcxproj*
+*.sln
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 
-# IDEs y editores
+# Editores generales y entornos de desarrollo
 .vscode/
 .idea/
 *.swp
+*.swo
 *~
-.codegraph/
-.atl/
-.pi/
+.history/
+*.sublime-project
+*.sublime-workspace
 
-# Temporales y logs
+# Python (servidor local de desarrollo y scripts de soporte)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+
+# Node.js / Web tooling (si se usaran herramientas locales)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Archivos del Sistema Operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Depuración, profiling y dumps
+*.dSYM/
+*.gdb
+*.gdb_history
+*.gcda
+*.gcno
+*.gcov
+core
+core.*
 *.log
 *.tmp
 
-# Dependencias npm locales si las hubiera
-node_modules/
+# Caches locales de herramientas auxiliares de workspace
+.codegraph/
+.atl/
+.pi/
