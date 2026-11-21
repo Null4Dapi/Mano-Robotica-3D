@@ -1,8 +1,6 @@
 # CyberHand 3D — Compilador Cinemático y Simulación Robótica
 
-Sistema integral de compilación en **C++20** y simulación tridimensional en **WebGL / Three.js** para el control biomecánico seguro de una mano robótica de 18 grados de libertad (GDL).
-
-Desarrollado para el curso de **Autómatas y Compiladores** (Semanas 10 a 15).
+Sistema de alto rendimiento implementado en **C++20** estándar acoplado a un entorno de simulación interactivo en **WebGL / Three.js** para el control biomecánico seguro de una mano robótica articulada de 18 grados de libertad (GDL).
 
 ---
 
@@ -51,11 +49,26 @@ Opciones de diagnóstico académico disponibles:
 * `--cuadruplas <archivo.rob>`: Imprime el código intermedio (TAC) sin optimizar.
 * `--optimizar <archivo.rob>`: Muestra cuádruplas optimizadas y métricas de reducción.
 
-### 4. Iniciar el Visor 3D
+### 4. Iniciar el Visor 3D y Túnel Público
 ```bash
-python3 -m http.server 8000 --directory web
+# Iniciar visor local en http://localhost:8000
+make serve
+
+# Compilar rutina y levantar visor en un solo paso
+make run
+
+# Exponer el visor local a internet con Cloudflare Tunnel
+make tunnel
 ```
 Abre en tu navegador: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## Documentación y Guías
+
+* [Guía de Descarga, Instalación en Windows y Sustentación](docs/GUIA_WINDOWS_SUSTENTACION.md)
+* [Principios de Arquitectura de Compiladores (AGENTS.md)](AGENTS.md)
+* [Especificación y Tokens de Diseño de la Interfaz (DESIGN.md)](DESIGN.md)
 
 ---
 
